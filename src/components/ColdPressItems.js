@@ -100,7 +100,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   return (
     <div className='main'>
       <header className='Logo-header text-center p-3'>
-        <img src={coldPressHeader} alt='Qulture Image' className='img-fluid mb-3'/> {/* Update the alt text as needed */}
+        <img src={coldPressHeader} alt='Qulture' className='img-fluid mb-3'/> {/* Update the alt text as needed */}
       </header>
       <button className='custom-button' onClick={goToMainMenu}>Back</button>
       <div className="container">

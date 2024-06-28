@@ -109,7 +109,7 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   return (
     <div className='main'>
       <header className='Logo-header text-center p-3'>
-        <img src={coffeeHeader} alt='Qulture Image' className='img-fluid mb-3'/>
+        <img src={coffeeHeader} alt='Qulture' className='img-fluid mb-3'/>
       </header>
       <button className='custom-button' onClick={goToMainMenu}>Back</button>
       <div className="container">
