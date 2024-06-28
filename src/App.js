@@ -25,7 +25,6 @@ import BackToTopButton from './components/BackToTopButton'; // Import the compon
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import StaffOrders from './components/StaffOrders';
-import { Button } from '@mui/material'; // Import the Button component
 
 function App() {
   const [view, setView] = useState('home');
