@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Replace 'your-heroku-app-url' with the actual URL of your Heroku app
-const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
+const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com';
 
 export const fetchMenuItems = async () => {
   try {
@@ -14,8 +14,6 @@ export const fetchMenuItems = async () => {
   }
 };
 
-// services/api.js
-
 export const submitOrder = async (order) => {
   try {
     const response = await fetch(`${BASE_URL}/api/orders`, {
@@ -24,21 +22,6 @@ export const submitOrder = async (order) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(order)
-    });
-    return await response.json();
-  } catch (error) {
-    return { error: error.message };
-  }
-};
-
-export const submitOrderItem = async (orderItem) => {
-  try {
-    const response = await fetch(`${BASE_URL}/api/order_items`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(orderItem)
     });
     return await response.json();
   } catch (error) {
