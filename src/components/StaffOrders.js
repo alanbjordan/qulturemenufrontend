@@ -6,8 +6,24 @@ import { Card, Button, Spinner, Alert } from 'react-bootstrap';
 
 // Replace 'your-heroku-app-url' with the actual URL of your Heroku app
 const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
-const socket = io('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/'); // Fallback for local development
+// Replace 'your-heroku-app-url' with the actual URL of your Heroku app
+const socket = io('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com', {
+  transports: ['websocket', 'polling']
+});
 
+// Handle socket connection events
+socket.on('connect', () => {
+  console.log('Connected to the backend');
+});
+
+socket.on('disconnect', () => {
+  console.log('Disconnected from the backend');
+});
+
+// Handle custom events
+socket.on('new_order', (data) => {
+  console.log('New order received', data);
+});
 const StaffOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
