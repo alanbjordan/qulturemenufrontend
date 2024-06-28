@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Replace 'your-heroku-app-url' with the actual URL of your Heroku app
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000'; // Fallback for local development
+const BASE_URL = process.env.REACT_APP_API_URL;
 
 export const fetchMenuItems = async () => {
   try {
