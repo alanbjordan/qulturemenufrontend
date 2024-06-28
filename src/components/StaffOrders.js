@@ -5,8 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button, Spinner, Alert } from 'react-bootstrap';
 
 // Replace 'your-heroku-app-url' with the actual URL of your Heroku app
-const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-const socket = io(process.env.REACT_APP_API_URL || 'http://localhost:5000'); // Fallback for local development
+const BASE_URL = process.env.REACT_APP_API_URL || 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com';
+const socket = io(process.env.REACT_APP_API_URL || 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com'); // Fallback for local development
 
 const StaffOrders = () => {
   const [orders, setOrders] = useState([]);
