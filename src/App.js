@@ -83,36 +83,36 @@ function App() {
         return (
           <div className="container">
             <header className='Logo-header text-center p-3'>
-              <img src={menuHeader} alt='Qulture Image' className='img-fluid mb-3'/>
+              <img src={menuHeader} alt='Qulture' className='img-fluid mb-3'/>
             </header>
             <div className="row justify-content-center">
               <div className="col-10">
                 <div className="section mb-4" onClick={() => setView('breakfast')}>
-                  <img src={breakfast} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={breakfast} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('brunch')}>
-                  <img src={brunchPhoto} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={brunchPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('coffee')}>
-                  <img src={coffeePhoto} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={coffeePhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('tea')}>
-                  <img src={teaPhoto} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={teaPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('smoothie')}>
-                  <img src={smoothiePhoto} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={smoothiePhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('coldPress')}>
-                  <img src={coldPressPhoto} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={coldPressPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('italiansoda')}>
-                  <img src={italianSodaPhoto} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={italianSodaPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('bakery')}>
-                  <img src={bakery} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={bakery} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
                 <div className="section mb-4" onClick={() => setView('saturdaySpecial')}>
-                  <img src={saturdaySpecial} className='img-fluid rounded border img-hover-effect'/>
+                  <img src={saturdaySpecial} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
                 </div>
               </div>
             </div>
