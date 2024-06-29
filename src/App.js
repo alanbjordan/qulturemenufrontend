@@ -25,6 +25,7 @@ import BackToTopButton from './components/BackToTopButton'; // Import the compon
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import StaffOrders from './components/StaffOrders';
+import CreatePass from './components/CreatePass'; 
 
 function App() {
   const [view, setView] = useState('home');
@@ -132,12 +133,16 @@ function App() {
             <li>
               <Link to="/login">Staff Login</Link>
             </li>
+            <li>
+              <Link to="/create-pass">Create Pass</Link> 
+            </li>
           </ul>
         </nav>
         <Routes>
           <Route path="/" element={renderContent()} />
           <Route path="/login" element={<Login />} />
           <Route path="/staff-orders" element={<StaffOrders />} />
+          <Route path="/create-pass" element={<CreatePass />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Cart cartItems={cartItems} setCartItems={setCartItems} clearCart={clearCart} />
