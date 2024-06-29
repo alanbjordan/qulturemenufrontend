@@ -31,7 +31,7 @@ const CreatePass = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        fetch('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/create-pass', {
+        fetch('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/create-pass', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
