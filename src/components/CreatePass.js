@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { fetchCountries } from './fetchCountries';
 
+const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com';
+
 const CreatePass = () => {
     const [formData, setFormData] = useState({
         name: '',
@@ -28,27 +30,32 @@ const CreatePass = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        fetch('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/create-pass', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert('Pass created successfully!');
-                } else {
-                    alert('Error creating pass: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
+        try {
+            const response = await fetch(`${BASE_URL}/api/create-pass`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
             });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.message === 'Pass created successfully!') {
+                alert('Pass created successfully!');
+            } else {
+                alert('Error creating pass: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     };
 
     return (
