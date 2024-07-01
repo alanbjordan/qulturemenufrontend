@@ -7,11 +7,13 @@ const CreatePass = () => {
     const [formData, setFormData] = useState({
         name: '',
         birthdate: '',
-        homeCountry: '',
+        home_country: '',
         email: '',
         gender: ''
     });
     const [countries, setCountries] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const getCountries = async () => {
@@ -32,6 +34,8 @@ const CreatePass = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError(null);
 
         try {
             const response = await fetch(`${BASE_URL}/api/create-pass`, {
@@ -49,12 +53,16 @@ const CreatePass = () => {
             const data = await response.json();
 
             if (data.message === 'Pass created successfully!') {
-                alert('Pass created successfully!');
+                // Redirect to the pass install URL
+                window.location.href = data.pass_install_url;
             } else {
-                alert('Error creating pass: ' + data.error);
+                setError('Error creating pass: ' + data.error);
             }
         } catch (error) {
+            setError('Error: ' + error.toString());
             console.error('Error:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,6 +75,7 @@ const CreatePass = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
+                    required
                 />
             </div>
             <div>
@@ -76,6 +85,7 @@ const CreatePass = () => {
                     name="birthdate"
                     value={formData.birthdate}
                     onChange={handleChange}
+                    required
                 />
             </div>
             <div>
@@ -84,6 +94,7 @@ const CreatePass = () => {
                     name="homeCountry"
                     value={formData.homeCountry}
                     onChange={handleChange}
+                    required
                 >
                     <option value="">Select Country</option>
                     {countries.map((country) => (
@@ -100,6 +111,7 @@ const CreatePass = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    required
                 />
             </div>
             <div>
@@ -108,6 +120,7 @@ const CreatePass = () => {
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
+                    required
                 >
                     <option value="">Select Gender</option>
                     <option value="Male">Male</option>
@@ -115,7 +128,10 @@ const CreatePass = () => {
                     <option value="Other">Other</option>
                 </select>
             </div>
-            <button type="submit">Create Pass</button>
+            <button type="submit" disabled={loading}>
+                {loading ? 'Creating Pass...' : 'Create Pass'}
+            </button>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
         </form>
     );
 };
