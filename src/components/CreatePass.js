@@ -91,8 +91,8 @@ const CreatePass = () => {
             <div>
                 <label>Home Country:</label>
                 <select
-                    name="homeCountry"
-                    value={formData.homeCountry}
+                    name="home_country"
+                    value={formData.home_country}
                     onChange={handleChange}
                     required
                 >
