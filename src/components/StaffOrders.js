@@ -3,6 +3,8 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button, Spinner, Alert } from 'react-bootstrap';
+import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
+import { css } from '@emotion/react';
 
 // Replace 'your-heroku-app-url' with the actual URL of your Heroku app
 const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
@@ -24,6 +26,21 @@ socket.on('disconnect', () => {
 socket.on('new_order', (data) => {
   console.log('New order received', data);
 });
+
+const override = css`
+  display: block;
+  margin: 0 auto;
+  border-color: red;
+`;
+
+const spinnerContainerStyle = {
+  position: 'fixed',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  zIndex: 9999,
+};
+
 const StaffOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +120,11 @@ const StaffOrders = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div style={spinnerContainerStyle}>
+        <ClipLoader color={"#D5AA55"} loading={loading} css={override} size={150} />
+      </div>
+    );
   }
 
   if (error) {

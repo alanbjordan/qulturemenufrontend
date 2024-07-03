@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Navbar, Container, Button, Offcanvas} from 'react-bootstrap'; // Added Nav
+import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
@@ -66,7 +68,7 @@ function App() {
   }, []);
 
   const renderContent = () => {
-    switch(view) {
+    switch (view) {
       case 'coffee':
         return <CoffeeItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
       case 'tea':
@@ -80,45 +82,45 @@ function App() {
       case 'brunch':
         return <BrunchItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
       case 'italiansoda':
-        return <ItalianSodaSoftDrinkItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;  
+        return <ItalianSodaSoftDrinkItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
       case 'bakery':
-        return <BakeryItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;  
+        return <BakeryItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
       case 'saturdaySpecial':
-        return <SaturdaySpecialItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;  
+        return <SaturdaySpecialItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
       default:
         return (
           <div className="container">
             <header className='Logo-header text-center p-3'>
-              <img src={menuHeader} alt='Qulture' className='img-fluid mb-3'/>
+              <img src={menuHeader} alt='Qulture' className='img-fluid mb-3' />
             </header>
             <div className="row justify-content-center">
               <div className="col-10">
                 <div className="section mb-4" onClick={() => setView('breakfast')}>
-                  <img src={breakfast} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={breakfast} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('brunch')}>
-                  <img src={brunchPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={brunchPhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('coffee')}>
-                  <img src={coffeePhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={coffeePhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('tea')}>
-                  <img src={teaPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={teaPhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('smoothie')}>
-                  <img src={smoothiePhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={smoothiePhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('coldPress')}>
-                  <img src={coldPressPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={coldPressPhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('italiansoda')}>
-                  <img src={italianSodaPhoto} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={italianSodaPhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('bakery')}>
-                  <img src={bakery} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={bakery} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
                 <div className="section mb-4" onClick={() => setView('saturdaySpecial')}>
-                  <img src={saturdaySpecial} alt='Qulture'  className='img-fluid rounded border img-hover-effect'/>
+                  <img src={saturdaySpecial} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
               </div>
             </div>
@@ -130,13 +132,17 @@ function App() {
   return (
     <Router>
       <div className="App bg-black">
-        <Navbar bg="dark" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
+        <Navbar bg="black" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
           <Container className="d-flex justify-content-between align-items-center">
             <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} />
+            <a href="/" onClick={() => window.location.reload()}>
+              <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
+            </a>
+
             <Button as={Link} to="/create-pass" variant="light" className="ms-auto" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold' }}>Join Membership</Button>
           </Container>
         </Navbar>
-  
+
         <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start" style={{ backgroundColor: '#000000' }}>
           <Offcanvas.Header>
             <Offcanvas.Title style={{ color: '#FFFFFF' }}>Qulture Lounge & Cafe</Offcanvas.Title>
@@ -148,7 +154,7 @@ function App() {
             <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
           </Offcanvas.Body>
         </Offcanvas>
-  
+
         <Routes>
           <Route path="/" element={renderContent()} />
           <Route path="/login" element={<Login />} />
@@ -161,9 +167,6 @@ function App() {
       </div>
     </Router>
   );
-  
-  
-
 }
 
 export default App;

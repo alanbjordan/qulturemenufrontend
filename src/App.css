@@ -145,6 +145,14 @@ body {
   color: black;
 }
 
+/* In your App.css or a global CSS file */
+ul, li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+
 
 /* Spinner animation */
 @keyframes spin {
