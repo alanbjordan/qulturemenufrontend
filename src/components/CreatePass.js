@@ -95,7 +95,7 @@ const CreatePass = () => {
         ) : (
           <form onSubmit={handleSubmit} className="login-form">
             <div className="input-group">
-              <label>Name</label>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Name</label>
               <input
                 type="text"
                 name="name"
@@ -106,7 +106,7 @@ const CreatePass = () => {
               />
             </div>
             <div className="input-group">
-              <label>Birthdate</label><br></br>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Birthdate</label>
               <input
                 type="date"
                 name="birthdate"
@@ -117,7 +117,7 @@ const CreatePass = () => {
               />
             </div>
             <div className="input-group">
-              <label>Home Country</label>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Home Country</label>
               <select
                 name="home_country"
                 value={formData.home_country}
@@ -134,7 +134,7 @@ const CreatePass = () => {
               </select>
             </div>
             <div className="input-group">
-              <label>Email</label>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Email</label>
               <input
                 type="email"
                 name="email"
@@ -145,7 +145,7 @@ const CreatePass = () => {
               />
             </div>
             <div className="input-group">
-              <label>Gender</label>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Gender</label>
               <select
                 name="gender"
                 value={formData.gender}
