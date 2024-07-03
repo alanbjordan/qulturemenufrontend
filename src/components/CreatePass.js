@@ -106,7 +106,7 @@ const CreatePass = () => {
               />
             </div>
             <div className="input-group">
-              <label>Birthdate</label>
+              <label>Birthdate</label><br></br>
               <input
                 type="date"
                 name="birthdate"
