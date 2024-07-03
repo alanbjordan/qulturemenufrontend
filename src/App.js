@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Navbar, Nav, Container } from 'react-bootstrap';
+import { Navbar, Nav, Container, Button, Offcanvas } from 'react-bootstrap';
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
@@ -24,7 +24,7 @@ import SaturdaySpecialItems from './components/SaturdaySpecialItems';
 import BackToTopButton from './components/BackToTopButton';
 import Login from './components/Login';
 import StaffOrders from './components/StaffOrders';
-import CreatePass from './components/CreatePass'; 
+import CreatePass from './components/CreatePass';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -44,6 +44,10 @@ function App() {
   }, [cartItems]);
 
   const [showButton, setShowButton] = useState(false);
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+
+  const handleClose = () => setShowOffcanvas(false);
+  const handleShow = () => setShowOffcanvas(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -126,19 +130,25 @@ function App() {
   return (
     <Router>
       <div className="App bg-black">
-        <Navbar bg="dark" variant="dark" expand="lg">
-          <Container>
-            <Navbar.Brand as={Link} to="/">Qulture</Navbar.Brand>
-            <Navbar.Toggle aria-controls="basic-navbar-nav" />
-            <Navbar.Collapse id="basic-navbar-nav">
-              <Nav className="me-auto">
-                <Nav.Link as={Link} to="/">Home</Nav.Link>
-                <Nav.Link as={Link} to="/login">Staff Login</Nav.Link>
-                <Nav.Link as={Link} to="/create-pass">Create Pass</Nav.Link>
-              </Nav>
-            </Navbar.Collapse>
+        <Navbar bg="dark" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center">
+          <Container className="d-flex justify-content-between align-items-center">
+            <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} />
+            <Navbar.Brand as={Link} to="/" className="ms-2">Qulture</Navbar.Brand>
+            <Button as={Link} to="/create-pass" variant="light" className="ms-auto">Join Membership</Button>
           </Container>
         </Navbar>
+
+        <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start">
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title>Menu</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body className="d-flex flex-column align-items-start p-4 bg-white">
+            <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose}>Home</Button>
+            <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose}>Staff Login</Button>
+            <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose}>Add Our Line Official</Button>
+          </Offcanvas.Body>
+        </Offcanvas>
+
         <Routes>
           <Route path="/" element={renderContent()} />
           <Route path="/login" element={<Login />} />
