@@ -22,10 +22,15 @@ const spinnerContainerStyle = {
   zIndex: 9999,
 };
 
+const toTitleCase = (str) => {
+  return str.replace(/\w\S*/g, (txt) => {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
+};
+
 const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [hotCoffeeItems, setHotCoffeeItems] = useState([]);
   const [nonHotCoffeeItems, setNonHotCoffeeItems] = useState([]);
-  const [quantities, setQuantities] = useState({}); // Track quantities for each item
   const [loading, setLoading] = useState(true); // State to manage loading
   const [imagesLoaded, setImagesLoaded] = useState(0); // Track the number of images loaded
   const [totalImages, setTotalImages] = useState(0); // Track the total number of images
@@ -65,37 +70,17 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   };
 
   const addToCart = (item) => {
-    const quantity = quantities[item.id] || 1;
     const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
     if (existingItem) {
       setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + quantity } : cartItem
+        cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity }]);
+      setCartItems([...cartItems, { ...item, quantity: 1 }]);
     }
-    // Reset quantity to 1 after adding to cart
-    setQuantities(prevQuantities => ({
-      ...prevQuantities,
-      [item.id]: 1
-    }));
     // Trigger shake animation
     setShakingButtonId(item.id);
     setTimeout(() => setShakingButtonId(null), 500); // Adjust duration as needed
-  };
-
-  const increaseQuantity = (itemId) => {
-    setQuantities(prevQuantities => ({
-      ...prevQuantities,
-      [itemId]: (prevQuantities[itemId] || 1) + 1
-    }));
-  };
-
-  const decreaseQuantity = (itemId) => {
-    setQuantities(prevQuantities => ({
-      ...prevQuantities,
-      [itemId]: Math.max((prevQuantities[itemId] || 1) - 1, 1)
-    }));
   };
 
   if (loading) {
@@ -115,70 +100,64 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       <div className="container">
         <div className="row">
           {hotCoffeeItems.map(item => (
-            <div key={item.id} className="col-md-3 mb-4">
-              <div className="card h-100">
-                {item.image_url && (
-                  <img
-                    src={placeholderImage}
-                    data-src={item.image_url}
-                    alt={item.item_name}
-                    className="card-img-top lazyload"
-                    style={{ height: '400px', objectFit: 'cover' }}
-                    onLoad={handleImageLoad}
-                    onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
-                  />
-                )}
-                <div className="card-body">
-                  <h3 className="card-title">{item.item_name}</h3>
-                  <p className="card-text">{item.description}</p>
-                  <h4 className="card-text">{item.variants[0].default_price}</h4>
-                  <div className="input-group mb-3 quantity-selector">
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => decreaseQuantity(item.id)}>-</button>
-                    <input type="text" className="form-control text-center" value={quantities[item.id] || 1} readOnly />
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => increaseQuantity(item.id)}>+</button>
+            <div key={item.id} className="col-md-12 mb-4">
+              <div className="card h-100 d-flex flex-row align-items-center">
+                <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
+                  <div>
+                    <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
+                    <h6 className="card-text">${item.variants[0].default_price}</h6>
+                    {item.description && (
+                      <p className="card-text">{item.description}</p>
+                    )}
                   </div>
                   <button
-                    className={`custom-button ${shakingButtonId === item.id ? 'shake' : ''}`}
+                    className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
                     onClick={() => addToCart(item)}
                   >
                     Add to Cart
                   </button>
                 </div>
+                <img
+                  src={placeholderImage}
+                  data-src={item.image_url}
+                  alt={item.item_name}
+                  className="card-img-right lazyload"
+                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
+                  onLoad={handleImageLoad}
+                  onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
+                />
               </div>
             </div>
           ))}
         </div>
         <div className="row">
           {nonHotCoffeeItems.map(item => (
-            <div key={item.id} className="col-md-3 mb-4">
-              <div className="card h-100">
-                {item.image_url && (
-                  <img
-                    src={placeholderImage}
-                    data-src={item.image_url}
-                    alt={item.item_name}
-                    className="card-img-top lazyload"
-                    style={{ height: '400px', objectFit: 'cover' }}
-                    onLoad={handleImageLoad}
-                    onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
-                  />
-                )}
-                <div className="card-body">
-                  <h3 className="card-title">{item.item_name}</h3>
-                  <p className="card-text">{item.description}</p>
-                  <h4 className="card-text">{item.variants[0].default_price}</h4>
-                  <div className="input-group mb-3 quantity-selector">
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => decreaseQuantity(item.id)}>-</button>
-                    <input type="text" className="form-control text-center" value={quantities[item.id] || 1} readOnly />
-                    <button className="btn btn-outline-secondary" type="button" onClick={() => increaseQuantity(item.id)}>+</button>
+            <div key={item.id} className="col-md-12 mb-4">
+              <div className="card h-100 d-flex flex-row align-items-center">
+                <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
+                  <div>
+                    <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
+                    <h6 className="card-text">${item.variants[0].default_price}</h6>
+                    {item.description && (
+                      <p className="card-text">{item.description}</p>
+                    )}
                   </div>
                   <button
-                    className={`custom-button ${shakingButtonId === item.id ? 'shake' : ''}`}
+                    className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
                     onClick={() => addToCart(item)}
                   >
                     Add to Cart
                   </button>
                 </div>
+                <img
+                  src={placeholderImage}
+                  data-src={item.image_url}
+                  alt={item.item_name}
+                  className="card-img-right lazyload"
+                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
+                  onLoad={handleImageLoad}
+                  onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
+                />
               </div>
             </div>
           ))}
