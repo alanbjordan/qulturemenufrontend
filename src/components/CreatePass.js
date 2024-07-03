@@ -29,7 +29,7 @@ const CreatePass = () => {
     gender: ''
   });
   const [countries, setCountries] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Set initial loading state to true
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -38,7 +38,13 @@ const CreatePass = () => {
       setCountries(countryList);
     };
 
-    getCountries();
+    const loadData = async () => {
+      const delay = new Promise((resolve) => setTimeout(resolve, 2000));
+      await Promise.all([getCountries(), delay]);
+      setLoading(false);
+    };
+
+    loadData();
   }, []);
 
   const handleChange = (e) => {
@@ -53,6 +59,8 @@ const CreatePass = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    const delay = new Promise((resolve) => setTimeout(resolve, 6000));
 
     try {
       const response = await fetch(`${BASE_URL}/api/create-pass`, {
@@ -78,9 +86,10 @@ const CreatePass = () => {
     } catch (error) {
       setError('Error: ' + error.toString());
       console.error('Error:', error);
-    } finally {
-      setLoading(false);
     }
+
+    await delay;
+    setLoading(false);
   };
 
   return (
