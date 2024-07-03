@@ -3,7 +3,7 @@ import { submitOrder } from '../services/api';
 import {
   IconButton, Badge, Modal, Backdrop, Fade, Paper, Typography, Button, List, ListItem,
   ListItemText, TextField, Grid, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogContentText, DialogTitle
+  DialogContentText, DialogTitle, Divider
 } from '@mui/material';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -31,14 +31,29 @@ const CartPaper = styled(Paper)(({ theme }) => ({
   maxHeight: '80vh',
   backgroundColor: theme.palette.background.paper,
   border: '2px solid #D5AA55',
-  borderRadius: '8px',
-  boxShadow: theme.shadows[5],
-  padding: theme.spacing(2, 4, 3),
+  borderRadius: '10px',
+  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+  display: 'flex',
+  flexDirection: 'column',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  overflowY: 'auto',
 }));
+
+const ModalContent = styled('div')(({ theme }) => ({
+  overflowY: 'auto',
+  padding: theme.spacing(2, 4, 3),
+  flex: '1 1 auto',
+}));
+
+const ButtonContainer = styled('div')({
+  padding: '10px 20px',
+  background: '#fff',
+  borderTop: '1px solid #ddd',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+});
 
 const CloseButtonContainer = styled('div')({
   display: 'flex',
@@ -119,7 +134,7 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
     <>
       <CartButton color="primary" onClick={handleOpen}>
         <Badge badgeContent={getTotalQuantity()} color="secondary">
-          <ShoppingCartIcon style={{ fontSize: '40px'}}/>
+          <ShoppingCartIcon style={{ fontSize: '40px' }} />
         </Badge>
       </CartButton>
       <Modal
@@ -140,48 +155,74 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
                 <CloseIcon />
               </IconButton>
             </CloseButtonContainer>
-            <Button style={{margin: '12px'}} variant="outlined" color="inherit" onClick={handleSubmitOrder} disabled={loading}>
-              {loading ? <CircularProgress size={24} /> : 'Submit Order'}
-            </Button>
-            <Button variant="outlined" color="inherit" onClick={clearCart}>Clear Cart</Button>
-            {orderStatus && <Typography variant="body2">{orderStatus}</Typography>}
-            <Typography variant="h6" id="transition-modal-title">Cart Items</Typography>
-            <List>
-              {cartItems.map(item => (
-                <ListItem key={item.id}>
-                  <Grid container spacing={1} alignItems="center">
-                    <Grid item xs={12} sm={6}>
-                      <ListItemText primary={`${item.item_name}`} />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        label="Comment"
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        margin="dense"
-                        value={item.comment || ''}
-                        onChange={(e) => handleCommentChange(item.id, e.target.value)}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="body2">Quantity: {item.quantity}</Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id)}>
-                        <RemoveIcon />
-                      </IconButton>
-                      <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id)}>
-                        <AddIcon />
-                      </IconButton>
-                      <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Grid>
-                  </Grid>
-                </ListItem>
-              ))}
-            </List>
+            <ModalContent>
+              {cartItems.length > 0 ? (
+                <List>
+                  {cartItems.map(item => (
+                    <React.Fragment key={item.id}>
+                      <ListItem>
+                        <Grid container spacing={1} alignItems="center">
+                          <Grid item xs={12}>
+                            <ListItemText
+                              primary={item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())}
+                              primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
+                            />
+                          </Grid>
+                          <Grid item xs={12}>
+                            <TextField
+                              label="Comment"
+                              variant="outlined"
+                              size="small"
+                              fullWidth
+                              margin="dense"
+                              value={item.comment || ''}
+                              onChange={(e) => handleCommentChange(item.id, e.target.value)}
+                            />
+                          </Grid>
+                          <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
+                            <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id)}>
+                              <RemoveIcon />
+                            </IconButton>
+                            <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id)}>
+                              <AddIcon />
+                            </IconButton>
+                            <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id)}>
+                              <DeleteIcon />
+                            </IconButton>
+                          </Grid>
+                        </Grid>
+                      </ListItem>
+                      <Divider />
+                    </React.Fragment>
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="h6" style={{ textAlign: 'center', padding: '20px' }}>Add items to cart</Typography>
+              )}
+              {orderStatus && <Typography variant="body2" style={{ marginTop: '12px' }}>{orderStatus}</Typography>}
+            </ModalContent>
+
+            {cartItems.length > 0 && (
+              <ButtonContainer>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmitOrder}
+                  disabled={loading}
+                  style={{ width: '100%', backgroundColor: '#D5AA55', color: '#FFFFFF' }}
+                >
+                  {loading ? <CircularProgress size={24} /> : 'Submit Order'}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={clearCart}
+                  style={{ width: '100%' }}
+                >
+                  Clear Cart
+                </Button>
+              </ButtonContainer>
+            )}
           </CartPaper>
         </Fade>
       </Modal>
