@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Navbar, Nav, Container, Button, Offcanvas } from 'react-bootstrap';
+import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
