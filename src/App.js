@@ -134,11 +134,10 @@ function App() {
       <div className="App bg-black">
         <Navbar bg="black" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
           <Container className="d-flex justify-content-between align-items-center">
-            <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} />
+            <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
             <a href="/" onClick={() => window.location.reload()}>
               <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
             </a>
-
             <Button as={Link} to="/create-pass" variant="light" className="ms-auto" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold' }}>Join Membership</Button>
           </Container>
         </Navbar>
@@ -149,7 +148,8 @@ function App() {
             <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} style={{ filter: 'invert(1)' }}></button>
           </Offcanvas.Header>
           <Offcanvas.Body className="d-flex flex-column align-items-start p-4" style={{ backgroundColor: '#FFFFFF' }}>
-            <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
+          <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={() => window.location.reload()} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
+
             <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
             <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
           </Offcanvas.Body>
