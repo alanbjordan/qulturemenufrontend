@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
@@ -12,8 +14,6 @@ import saturdaySpecial from './images/saturdaySpecial.png';
 import CoffeeItems from './components/CoffeeItems';
 import TeaItems from './components/TeaItems';
 import Cart from './components/Cart';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './App.css';
 import SmoothieItems from './components/SmoothieItems';
 import ColdPressItems from './components/ColdPressItems';
 import BreakfastItems from './components/BreakfastItems';
@@ -21,11 +21,12 @@ import BrunchItems from './components/BrunchItems';
 import ItalianSodaSoftDrinkItems from './components/ItalianSodaSoftDrinkItems';
 import BakeryItems from './components/BakeryItems';
 import SaturdaySpecialItems from './components/SaturdaySpecialItems';
-import BackToTopButton from './components/BackToTopButton'; // Import the component
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import BackToTopButton from './components/BackToTopButton';
 import Login from './components/Login';
 import StaffOrders from './components/StaffOrders';
 import CreatePass from './components/CreatePass'; 
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
 
 function App() {
   const [view, setView] = useState('home');
@@ -125,19 +126,19 @@ function App() {
   return (
     <Router>
       <div className="App bg-black">
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/login">Staff Login</Link>
-            </li>
-            <li>
-              <Link to="/create-pass">Create Pass</Link> 
-            </li>
-          </ul>
-        </nav>
+        <Navbar bg="dark" variant="dark" expand="lg">
+          <Container>
+            <Navbar.Brand as={Link} to="/">Qulture</Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="me-auto">
+                <Nav.Link as={Link} to="/">Home</Nav.Link>
+                <Nav.Link as={Link} to="/login">Staff Login</Nav.Link>
+                <Nav.Link as={Link} to="/create-pass">Create Pass</Nav.Link>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>
         <Routes>
           <Route path="/" element={renderContent()} />
           <Route path="/login" element={<Login />} />
