@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
-import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
+import { Navbar, Container, Button, Offcanvas, Nav } from 'react-bootstrap'; // Added Nav
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
@@ -130,25 +130,25 @@ function App() {
   return (
     <Router>
       <div className="App bg-black">
-        <Navbar bg="dark" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center">
+        <Navbar bg="dark" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
           <Container className="d-flex justify-content-between align-items-center">
             <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} />
-            <Navbar.Brand as={Link} to="/" className="ms-2">Qulture</Navbar.Brand>
-            <Button as={Link} to="/create-pass" variant="light" className="ms-auto">Join Membership</Button>
+            <Button as={Link} to="/create-pass" variant="light" className="ms-auto" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold' }}>Join Membership</Button>
           </Container>
         </Navbar>
-
-        <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start">
-          <Offcanvas.Header closeButton>
-            <Offcanvas.Title>Menu</Offcanvas.Title>
+  
+        <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start" style={{ backgroundColor: '#000000' }}>
+          <Offcanvas.Header>
+            <Offcanvas.Title style={{ color: '#FFFFFF' }}>Qulture Lounge & Cafe</Offcanvas.Title>
+            <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} style={{ filter: 'invert(1)' }}></button>
           </Offcanvas.Header>
-          <Offcanvas.Body className="d-flex flex-column align-items-start p-4 bg-white">
-            <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose}>Home</Button>
-            <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose}>Staff Login</Button>
-            <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose}>Add Our Line Official</Button>
+          <Offcanvas.Body className="d-flex flex-column align-items-start p-4" style={{ backgroundColor: '#FFFFFF' }}>
+            <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
+            <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
+            <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
           </Offcanvas.Body>
         </Offcanvas>
-
+  
         <Routes>
           <Route path="/" element={renderContent()} />
           <Route path="/login" element={<Login />} />
@@ -161,6 +161,9 @@ function App() {
       </div>
     </Router>
   );
+  
+  
+
 }
 
 export default App;
