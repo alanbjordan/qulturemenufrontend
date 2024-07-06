@@ -72,20 +72,25 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   };
 
   const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => cartItem.id === item.id && (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)));
+    const existingItem = cartItems.find(cartItem => 
+      cartItem.id === item.id && 
+      (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
+      JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
+    );
     if (existingItem) {
       setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id && (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null))
+        cartItem.id === item.id && 
+        (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
+        JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
           ? { ...cartItem, quantity: cartItem.quantity + 1 }
           : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant }]);
+      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers: modifiers }]);
     }
-    // Trigger shake animation
     setShakingButtonId(item.id);
-    setTimeout(() => setShakingButtonId(null), 500); // Adjust duration as needed
-    setModalShow(false); // Close modal if it was open
+    setTimeout(() => setShakingButtonId(null), 500);
+    setModalShow(false);
   };
 
   const handleAddToCartClick = async (item) => {
@@ -111,9 +116,6 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     return await response.json();
   };
   
-  
-  
-  
   const handleModalShow = (item) => {
     console.log("Opening modal for item:", item);
     setModalContent(item);
@@ -128,8 +130,10 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   };
 
   const handleModifierChange = (event, modifierIndex) => {
+    const selectedOptionId = event.target.value;
+    const selectedOption = selectedOptionId ? modifiers[modifierIndex].modifier_options.find(option => option.id === selectedOptionId) : null;
     const newModifiers = [...modifiers];
-    newModifiers[modifierIndex].selectedOption = event.target.value;
+    newModifiers[modifierIndex].selectedOption = selectedOption || {}; // Ensure selectedOption is always an object
     setModifiers(newModifiers);
   };
 
@@ -215,6 +219,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
               <Form.Label>{modifier.name}</Form.Label>
               <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
+                <option value="">None</option> {/* Add default None option */}
                 {modifier.modifier_options.map(option => (
                   <option key={option.id} value={option.id}>
                     {option.name} - ${option.price}
