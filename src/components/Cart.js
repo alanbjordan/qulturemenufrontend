@@ -79,27 +79,27 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
     setDialogOpen(false);
   };
 
-  const handleRemoveItem = (itemId) => {
-    const updatedCartItems = cartItems.filter(item => item.id !== itemId);
+  const handleRemoveItem = (itemId, variantId) => {
+    const updatedCartItems = cartItems.filter(item => item.id !== itemId || item.selectedVariant.variant_id !== variantId);
     setCartItems(updatedCartItems);
   };
 
-  const handleCommentChange = (itemId, comment) => {
+  const handleCommentChange = (itemId, variantId, comment) => {
     const updatedCartItems = cartItems.map(item => 
-      item.id === itemId ? { ...item, comment } : item
+      item.id === itemId && item.selectedVariant.variant_id === variantId ? { ...item, comment } : item
     );
     setCartItems(updatedCartItems);
   };
 
-  const increaseQuantity = (itemId) => {
+  const increaseQuantity = (itemId, variantId) => {
     setCartItems(cartItems.map(item =>
-      item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
+      item.id === itemId && item.selectedVariant.variant_id === variantId ? { ...item, quantity: item.quantity + 1 } : item
     ));
   };
 
-  const decreaseQuantity = (itemId) => {
+  const decreaseQuantity = (itemId, variantId) => {
     setCartItems(cartItems.map(item =>
-      item.id === itemId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
+      item.id === itemId && item.selectedVariant.variant_id === variantId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     ));
   };
 
@@ -109,6 +109,7 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
       table_name: 'Table 2',  // Replace this with the actual table name, or get it from user input
       line_items: cartItems.map(item => ({
         item_name: item.item_name,
+        variant_name: item.selectedVariant ? item.selectedVariant.option1_value : '',
         quantity: item.quantity,
         comment: item.comment || ''
       })),
@@ -159,12 +160,13 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
               {cartItems.length > 0 ? (
                 <List>
                   {cartItems.map(item => (
-                    <React.Fragment key={item.id}>
+                    <React.Fragment key={`${item.id}-${item.selectedVariant ? item.selectedVariant.variant_id : 'no-variant'}`}>
                       <ListItem>
                         <Grid container spacing={1} alignItems="center">
                           <Grid item xs={12}>
                             <ListItemText
                               primary={item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())}
+                              secondary={item.selectedVariant ? `Variant: ${item.selectedVariant.option1_value}` : ''}
                               primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
                             />
                           </Grid>
@@ -176,18 +178,18 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
                               fullWidth
                               margin="dense"
                               value={item.comment || ''}
-                              onChange={(e) => handleCommentChange(item.id, e.target.value)}
+                              onChange={(e) => handleCommentChange(item.id, item.selectedVariant.variant_id, e.target.value)}
                             />
                           </Grid>
                           <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
                             <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
-                            <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id)}>
+                            <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id, item.selectedVariant.variant_id)}>
                               <RemoveIcon />
                             </IconButton>
-                            <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id)}>
+                            <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id, item.selectedVariant.variant_id)}>
                               <AddIcon />
                             </IconButton>
-                            <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id)}>
+                            <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id, item.selectedVariant.variant_id)}>
                               <DeleteIcon />
                             </IconButton>
                           </Grid>

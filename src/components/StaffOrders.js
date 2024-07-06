@@ -6,14 +6,11 @@ import { Card, Button, Spinner, Alert } from 'react-bootstrap';
 import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
 import { css } from '@emotion/react';
 
-// Replace 'your-heroku-app-url' with the actual URL of your Heroku app
 const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
-// Replace 'your-heroku-app-url' with the actual URL of your Heroku app
-const socket = io('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com', {
+const socket = io(BASE_URL, {
   transports: ['websocket', 'polling']
 });
 
-// Handle socket connection events
 socket.on('connect', () => {
   console.log('Connected to the backend');
 });
@@ -22,7 +19,6 @@ socket.on('disconnect', () => {
   console.log('Disconnected from the backend');
 });
 
-// Handle custom events
 socket.on('new_order', (data) => {
   console.log('New order received', data);
 });
@@ -54,7 +50,6 @@ const StaffOrders = () => {
         const response = await axios.get(`${BASE_URL}/api/orders`);
         const data = response.data;
 
-        // Group orders by order_id
         const groupedOrders = data.reduce((acc, order) => {
           const { order_id, table_name, item_name, quantity, comment } = order;
           if (!acc[order_id]) {
@@ -78,7 +73,6 @@ const StaffOrders = () => {
 
     fetchOrders();
 
-    // Set up Socket.IO listener for new orders
     socket.on('new_order', (newOrder) => {
       setOrders((prevOrders) => {
         const orderExists = prevOrders.find(order => order.order_id === newOrder.order_id);
@@ -90,7 +84,6 @@ const StaffOrders = () => {
       });
     });
 
-    // Set up Socket.IO listener for order status updates
     socket.on('order_status_update', (updatedOrder) => {
       setOrders((prevOrders) => prevOrders.filter(order => order.order_id !== updatedOrder.order_id));
     });
@@ -132,25 +125,37 @@ const StaffOrders = () => {
   }
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Orders</h2>
+    <div className="container mt-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      <h2 className="mb-4" style={{ fontWeight: 700 }}>Orders</h2>
       {success && <Alert variant="success">{success}</Alert>}
       {orders.map(order => (
-        <Card key={order.order_id} className="mb-3">
-          <Card.Header>Table: {order.table_name}</Card.Header>
+        <Card key={order.order_id} className="mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+          <Card.Header style={{ fontWeight: 500 }}>Table: {order.table_name}</Card.Header>
           <Card.Body>
-            <Card.Title>Order ID: {order.order_id}</Card.Title>
-            <ul>
-              {order.items.map((item, index) => (
-                <li key={index}>
-                  {item.quantity} x {item.item_name} {item.comment && `- ${item.comment}`}
-                </li>
-              ))}
-            </ul>
+            <Card.Title style={{ fontWeight: 700 }}>Order ID: {order.order_id}</Card.Title>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', textAlign: 'left', width: '75%' }}>
+                {order.items.map((item, index) => (
+                  <div 
+                    key={index} 
+                    style={{ 
+                      padding: '10px 0', 
+                      borderBottom: index < order.items.length - 1 ? '1px solid #ddd' : 'none', 
+                      textAlign: 'left'
+                    }}
+                  >
+                    <div><strong>Quantity:</strong> {item.quantity}</div>
+                    <div><strong>Item:</strong> {item.item_name}</div>
+                    {item.comment && <div><strong>Comment:</strong> {item.comment}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
             <Button 
-              variant="primary" 
+              variant="dark" 
               onClick={() => handleTicketOpened(order.order_id)} 
               disabled={loadingButton === order.order_id}
+              style={{ marginTop: '15px', fontFamily: 'Roboto, sans-serif' }}
             >
               {loadingButton === order.order_id ? (
                 <>
