@@ -80,26 +80,26 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
   };
 
   const handleRemoveItem = (itemId, variantId) => {
-    const updatedCartItems = cartItems.filter(item => item.id !== itemId || item.selectedVariant.variant_id !== variantId);
+    const updatedCartItems = cartItems.filter(item => item.id !== itemId || (item.selectedVariant && item.selectedVariant.variant_id !== variantId));
     setCartItems(updatedCartItems);
   };
 
   const handleCommentChange = (itemId, variantId, comment) => {
     const updatedCartItems = cartItems.map(item => 
-      item.id === itemId && item.selectedVariant.variant_id === variantId ? { ...item, comment } : item
+      item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId ? { ...item, comment } : item
     );
     setCartItems(updatedCartItems);
   };
 
   const increaseQuantity = (itemId, variantId) => {
     setCartItems(cartItems.map(item =>
-      item.id === itemId && item.selectedVariant.variant_id === variantId ? { ...item, quantity: item.quantity + 1 } : item
+      item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId ? { ...item, quantity: item.quantity + 1 } : item
     ));
   };
 
   const decreaseQuantity = (itemId, variantId) => {
     setCartItems(cartItems.map(item =>
-      item.id === itemId && item.selectedVariant.variant_id === variantId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
+      item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     ));
   };
 
@@ -111,7 +111,10 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
         item_name: item.item_name,
         variant_name: item.selectedVariant ? item.selectedVariant.option1_value : '',
         quantity: item.quantity,
-        comment: item.comment || ''
+        comment: item.comment || '',
+        modifiers: item.selectedModifiers.map(modifier => 
+          `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''}`
+        ).join(', ')
       })),
     };
   
@@ -170,6 +173,15 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
                               primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
                             />
                           </Grid>
+                          {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                            <Grid item xs={12}>
+                              <Typography variant="body2">
+                                Modifiers: {item.selectedModifiers.map(modifier => 
+                                  `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''}`
+                                ).join(', ')}
+                              </Typography>
+                            </Grid>
+                          )}
                           <Grid item xs={12}>
                             <TextField
                               label="Comment"
