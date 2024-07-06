@@ -40,6 +40,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [modalContent, setModalContent] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null); // State to manage selected variant
   const [modifiers, setModifiers] = useState([]); // State to manage modifiers
+  const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
 
   useEffect(() => {
     const getMenuItems = async () => {
@@ -88,12 +89,22 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     } else {
       setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers: modifiers }]);
     }
-    setShakingButtonId(item.id);
-    setTimeout(() => setShakingButtonId(null), 500);
     setModalShow(false);
+    setLoadingButtonId(item.id); // Start spinner
+    setTimeout(() => {
+      setLoadingButtonId(null); // Stop spinner
+      setShakingButtonId(item.id); // Start shaking
+      setTimeout(() => {
+        setShakingButtonId(null); // Stop shaking
+        setTimeout(() => {
+          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
+        }, 500); // Delay before reverting to "Add to Cart"
+      }, 500); // Duration of shake animation
+    }, 500); // Duration of spinner before modal opens
   };
 
   const handleAddToCartClick = async (item) => {
+    setLoadingButtonId(item.id); // Start spinner
     if (item.modifier_ids && item.modifier_ids.length > 0) {
       try {
         const fetchedModifier = await fetchModifierData(item.modifier_ids[0]); // Fetch the first modifier ID only
@@ -105,9 +116,14 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     } else {
       setModifiers([]);
     }
-    handleModalShow(item);
+    setModalContent(item);
+    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
+    setTimeout(() => {
+      setModalShow(true);
+      setLoadingButtonId(null); // Stop spinner once modal opens
+    }, 500); // Adjust duration as needed
   };
-  
+
   const fetchModifierData = async (modifierId) => {
     const response = await fetch(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/modifiers?modifier_id=${modifierId}`);
     if (!response.ok) {
@@ -115,12 +131,10 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     }
     return await response.json();
   };
-  
-  const handleModalShow = (item) => {
-    console.log("Opening modal for item:", item);
-    setModalContent(item);
-    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
-    setModalShow(true);
+
+  const handleModalClose = () => {
+    setModalShow(false);
+    setLoadingButtonId(null); // Reset loading state if modal is closed without adding
   };
 
   const handleVariantChange = (event) => {
@@ -170,7 +184,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                       <h6 className="card-text">${item.default_price}</h6>
                     )}
                     {item.description && (
-                      <Button variant="link" onClick={() => handleModalShow(item)}>
+                      <Button variant="link" onClick={() => handleAddToCartClick(item)}>
                         View Description
                       </Button>
                     )}
@@ -179,7 +193,13 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                     className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
                     onClick={() => handleAddToCartClick(item)}
                   >
-                    Add to Cart
+                    {loadingButtonId === item.id ? (
+                      <ClipLoader color={"#ffffff"} loading={true} size={15} />
+                    ) : shakingButtonId === item.id ? (
+                      "Adding"
+                    ) : (
+                      "Add to Cart"
+                    )}
                   </button>
                 </div>
                 <img
@@ -197,7 +217,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         </div>
       </div>
 
-      <Modal show={modalShow} onHide={() => setModalShow(false)}>
+      <Modal show={modalShow} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>{modalContent.item_name}</Modal.Title>
         </Modal.Header>
@@ -230,7 +250,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           ))}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setModalShow(false)}>
+          <Button variant="secondary" onClick={handleModalClose}>
             Close
           </Button>
           <Button variant="primary" onClick={handleAddVariantToCart}>
