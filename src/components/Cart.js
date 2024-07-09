@@ -211,6 +211,14 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
 
             {cartItems.length > 0 && (
               <ButtonContainer>
+                                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={clearCart}
+                  style={{ width: '100%', backgroundColor: '#000000', color: '#FFFFFF' }}
+                >
+                  Clear Cart
+                </Button>
                 <Button
                   variant="contained"
                   onClick={handleSubmitOrder}
@@ -219,14 +227,7 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
                 >
                   {loading ? <CircularProgress size={24} /> : 'Submit Order'}
                 </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={clearCart}
-                  style={{ width: '100%' }}
-                >
-                  Clear Cart
-                </Button>
+
               </ButtonContainer>
             )}
           </CartPaper>
