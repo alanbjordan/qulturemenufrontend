@@ -56,7 +56,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       await getMenuItems(); // Fetch data in the background
       setTimeout(() => {
         setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 500); // Wait for 3 seconds
+      }, 10); // Wait for 3 seconds
     };
 
     loadData();
@@ -72,36 +72,38 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     setImagesLoaded(prevCount => prevCount + 1);
   };
 
-  const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => 
+const addToCart = (item) => {
+  const existingItem = cartItems.find(cartItem => 
+    cartItem.id === item.id && 
+    (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
+    JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
+  );
+  const itemPrice = selectedVariant ? selectedVariant.default_price : item.default_price;
+  if (existingItem) {
+    setCartItems(cartItems.map(cartItem =>
       cartItem.id === item.id && 
       (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
       JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
-    );
-    if (existingItem) {
-      setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id && 
-        (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
-        JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      ));
-    } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers: modifiers }]);
-    }
-    setModalShow(false);
-    setLoadingButtonId(item.id); // Start spinner
+        ? { ...cartItem, quantity: cartItem.quantity + 1 }
+        : cartItem
+    ));
+  } else {
+    setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers: modifiers, price: itemPrice }]);
+  }
+  setModalShow(false);
+  setLoadingButtonId(item.id); // Start spinner
+  setTimeout(() => {
+    setLoadingButtonId(null); // Stop spinner
+    setShakingButtonId(item.id); // Start shaking
     setTimeout(() => {
-      setLoadingButtonId(null); // Stop spinner
-      setShakingButtonId(item.id); // Start shaking
+      setShakingButtonId(null); // Stop shaking
       setTimeout(() => {
-        setShakingButtonId(null); // Stop shaking
-        setTimeout(() => {
-          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
-        }, 500); // Delay before reverting to "Add to Cart"
-      }, 500); // Duration of shake animation
-    }, 500); // Duration of spinner before modal opens
-  };
+        setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
+      }, 500); // Delay before reverting to "Add to Cart"
+    }, 500); // Duration of shake animation
+  }, 500); // Duration of spinner before modal opens
+};
+
 
   const handleAddToCartClick = async (item) => {
     setLoadingButtonId(item.id); // Start spinner
