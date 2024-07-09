@@ -1,28 +1,14 @@
 import React, { useState } from 'react';
-import { submitOrder } from '../services/api';
 import {
-  IconButton, Badge, Modal, Backdrop, Fade, Paper, Typography, Button, List, ListItem,
+  IconButton, Modal, Backdrop, Fade, Paper, Typography, Button, List, ListItem,
   ListItemText, TextField, Grid, CircularProgress, Dialog, DialogActions, DialogContent,
   DialogContentText, DialogTitle, Divider
 } from '@mui/material';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import { styled } from '@mui/material/styles';
-
-const CartButton = styled(IconButton)(({ theme }) => ({
-  position: 'fixed',
-  bottom: theme.spacing(2),
-  right: theme.spacing(2),
-  zIndex: 1000,
-  backgroundColor: '#D5AA55',
-  color: 'black',
-  width: theme.spacing(8),
-  height: theme.spacing(8),
-  fontSize: '24px',
-}));
 
 const CartPaper = styled(Paper)(({ theme }) => ({
   position: 'absolute',
@@ -60,24 +46,20 @@ const CloseButtonContainer = styled('div')({
   justifyContent: 'flex-end',
 });
 
-const Cart = ({ cartItems, setCartItems, clearCart }) => {
+// Mock submitOrder function
+const submitOrder = async (order) => {
+  // Simulate an API call with a delay
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ error: false }); // Simulate a successful response
+    }, 2000);
+  });
+};
+
+const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   const [orderStatus, setOrderStatus] = useState(null);
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  const handleOpen = () => {
-    setOrderStatus(null);  // Reset order status when opening the cart
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleDialogClose = () => {
-    setDialogOpen(false);
-  };
 
   const handleRemoveItem = (itemId, variantId) => {
     const updatedCartItems = cartItems.filter(item => item.id !== itemId || (item.selectedVariant && item.selectedVariant.variant_id !== variantId));
@@ -85,7 +67,7 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
   };
 
   const handleCommentChange = (itemId, variantId, comment) => {
-    const updatedCartItems = cartItems.map(item => 
+    const updatedCartItems = cartItems.map(item =>
       item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId ? { ...item, comment } : item
     );
     setCartItems(updatedCartItems);
@@ -112,12 +94,12 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
         variant_name: item.selectedVariant ? item.selectedVariant.option1_value : '',
         quantity: item.quantity,
         comment: item.comment || '',
-        modifiers: item.selectedModifiers.map(modifier => 
+        modifiers: item.selectedModifiers.map(modifier =>
           `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''}`
         ).join(', ')
       })),
     };
-  
+
     const result = await submitOrder(order);
     setLoading(false);
     if (result.error) {
@@ -125,27 +107,31 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
     } else {
       setOrderStatus('Order submitted successfully');
       clearCart();
-      handleClose();
+      onClose();
     }
     setDialogOpen(true);
   };
 
-  const getTotalQuantity = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  const getTotalPrice = () => {
+    const total = cartItems.reduce((total, item) => {
+      const itemPrice = item.price;
+      const modifiersPrice = item.selectedModifiers.reduce((modTotal, mod) => {
+        return modTotal + (mod.selectedOption ? mod.selectedOption.price : 0);
+      }, 0);
+      console.log(`Item: ${item.item_name}, Item Price: ${itemPrice}, Modifiers Price: ${modifiersPrice}, Quantity: ${item.quantity}`);
+      return total + (itemPrice + modifiersPrice) * item.quantity;
+    }, 0).toFixed(2);
+    console.log(`Total Price: ${total}`);
+    return total;
   };
 
   return (
     <>
-      <CartButton color="primary" onClick={handleOpen}>
-        <Badge badgeContent={getTotalQuantity()} color="secondary">
-          <ShoppingCartIcon style={{ fontSize: '40px' }} />
-        </Badge>
-      </CartButton>
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
         open={open}
-        onClose={handleClose}
+        onClose={onClose}
         closeAfterTransition
         BackdropComponent={Backdrop}
         BackdropProps={{
@@ -155,62 +141,65 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
         <Fade in={open}>
           <CartPaper>
             <CloseButtonContainer>
-              <IconButton onClick={handleClose}>
+              <IconButton onClick={onClose}>
                 <CloseIcon />
               </IconButton>
             </CloseButtonContainer>
             <ModalContent>
               {cartItems.length > 0 ? (
-                <List>
-                  {cartItems.map(item => (
-                    <React.Fragment key={`${item.id}-${item.selectedVariant ? item.selectedVariant.variant_id : 'no-variant'}`}>
-                      <ListItem>
-                        <Grid container spacing={1} alignItems="center">
-                          <Grid item xs={12}>
-                            <ListItemText
-                              primary={item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())}
-                              secondary={item.selectedVariant ? `Variant: ${item.selectedVariant.option1_value}` : ''}
-                              primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
-                            />
-                          </Grid>
-                          {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                <>
+                  <List>
+                    {cartItems.map(item => (
+                      <React.Fragment key={`${item.id}-${item.selectedVariant ? item.selectedVariant.variant_id : 'no-variant'}`}>
+                        <ListItem>
+                          <Grid container spacing={1} alignItems="center">
                             <Grid item xs={12}>
-                              <Typography variant="body2">
-                                Modifiers: {item.selectedModifiers.map(modifier => 
-                                  `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''}`
-                                ).join(', ')}
-                              </Typography>
+                              <ListItemText
+                                primary={`${item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())} - $${item.price}`}
+                                secondary={item.selectedVariant ? `Variant: ${item.selectedVariant.option1_value}` : ''}
+                                primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
+                              />
                             </Grid>
-                          )}
-                          <Grid item xs={12}>
-                            <TextField
-                              label="Comment"
-                              variant="outlined"
-                              size="small"
-                              fullWidth
-                              margin="dense"
-                              value={item.comment || ''}
-                              onChange={(e) => handleCommentChange(item.id, item.selectedVariant.variant_id, e.target.value)}
-                            />
+                            {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                              <Grid item xs={12}>
+                                <Typography variant="body2">
+                                  Modifiers: {item.selectedModifiers.map(modifier =>
+                                    `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''} ${modifier.selectedOption && modifier.selectedOption.price ? `- $${modifier.selectedOption.price}` : ''}`
+                                  ).join(', ')}
+                                </Typography>
+                              </Grid>
+                            )}
+                            <Grid item xs={12}>
+                              <TextField
+                                label="Comment"
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                margin="dense"
+                                value={item.comment || ''}
+                                onChange={(e) => handleCommentChange(item.id, item.selectedVariant.variant_id, e.target.value)}
+                              />
+                            </Grid>
+                            <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
+                              <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
+                              <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id, item.selectedVariant.variant_id)}>
+                                <RemoveIcon />
+                              </IconButton>
+                              <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id, item.selectedVariant.variant_id)}>
+                                <AddIcon />
+                              </IconButton>
+                              <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id, item.selectedVariant.variant_id)}>
+                                <DeleteIcon />
+                              </IconButton>
+                            </Grid>
                           </Grid>
-                          <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
-                            <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id, item.selectedVariant.variant_id)}>
-                              <RemoveIcon />
-                            </IconButton>
-                            <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id, item.selectedVariant.variant_id)}>
-                              <AddIcon />
-                            </IconButton>
-                            <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id, item.selectedVariant.variant_id)}>
-                              <DeleteIcon />
-                            </IconButton>
-                          </Grid>
-                        </Grid>
-                      </ListItem>
-                      <Divider />
-                    </React.Fragment>
-                  ))}
-                </List>
+                        </ListItem>
+                        <Divider />
+                      </React.Fragment>
+                    ))}
+                  </List>
+                  <Typography variant="h6" style={{ textAlign: 'center', padding: '20px' }}>Total Price: ${getTotalPrice()}</Typography>
+                </>
               ) : (
                 <Typography variant="h6" style={{ textAlign: 'center', padding: '20px' }}>Add items to cart</Typography>
               )}
@@ -243,7 +232,7 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
 
       <Dialog
         open={dialogOpen}
-        onClose={handleDialogClose}
+        onClose={() => setDialogOpen(false)}
         aria-labelledby="order-status-dialog-title"
         aria-describedby="order-status-dialog-description"
       >
@@ -254,7 +243,7 @@ const Cart = ({ cartItems, setCartItems, clearCart }) => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose} color="primary">Close</Button>
+          <Button onClick={() => setDialogOpen(false)} color="primary">Close</Button>
         </DialogActions>
       </Dialog>
     </>

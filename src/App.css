@@ -152,6 +152,24 @@ ul, li {
   padding: 0;
 }
 
+.talk-to-digital-server-btn {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #D5AA55;
+  color: #000000;
+  font-weight: bold;
+  z-index: 1000; /* Ensure it sits above other elements */
+}
+
+.fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #D5AA55;
+  color: #000;
+}
 
 
 /* Spinner animation */

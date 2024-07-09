@@ -2,7 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import Fab from '@mui/material/Fab';
+import ChatIcon from '@mui/icons-material/Chat';
+import { IconButton } from '@mui/material';
+import Badge from '@mui/material/Badge';
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
@@ -15,7 +19,6 @@ import italianSodaPhoto from './images/italianSoda.png';
 import saturdaySpecial from './images/saturdaySpecial.png';
 import CoffeeItems from './components/CoffeeItems';
 import TeaItems from './components/TeaItems';
-import Cart from './components/Cart';
 import SmoothieItems from './components/SmoothieItems';
 import ColdPressItems from './components/ColdPressItems';
 import BreakfastItems from './components/BreakfastItems';
@@ -27,6 +30,8 @@ import BackToTopButton from './components/BackToTopButton';
 import Login from './components/Login';
 import StaffOrders from './components/StaffOrders';
 import CreatePass from './components/CreatePass';
+import Cart from './components/Cart';
+import ChatModal from './components/ChatModal';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -47,9 +52,15 @@ function App() {
 
   const [showButton, setShowButton] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(false);
+  const [showCart, setShowCart] = useState(false);
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
+
+  const getTotalQuantity = () => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -138,7 +149,14 @@ function App() {
             <a href="/" onClick={() => window.location.reload()}>
               <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
             </a>
-            <Button as={Link} to="/create-pass" variant="light" className="ms-auto" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold' }}>Join Membership</Button>
+            <div className="ms-auto d-flex align-items-center">
+              <Button as={Link} to="/create-pass" variant="light" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>Qulture Rewards</Button>
+              <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
+                <Badge badgeContent={getTotalQuantity()} color="secondary">
+                  <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
+                </Badge>
+              </IconButton>
+            </div>
           </Container>
         </Navbar>
 
@@ -148,8 +166,7 @@ function App() {
             <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} style={{ filter: 'invert(1)' }}></button>
           </Offcanvas.Header>
           <Offcanvas.Body className="d-flex flex-column align-items-start p-4" style={{ backgroundColor: '#FFFFFF' }}>
-          <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={() => window.location.reload()} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
-
+            <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={() => window.location.reload()} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
             <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
             <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
           </Offcanvas.Body>
@@ -162,8 +179,16 @@ function App() {
           <Route path="/create-pass" element={<CreatePass />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
-        <Cart cartItems={cartItems} setCartItems={setCartItems} clearCart={clearCart} />
         <BackToTopButton show={showButton} />
+        <Cart cartItems={cartItems} setCartItems={setCartItems} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
+
+        {/* Add FAB */}
+        <Fab color="primary" aria-label="chat" onClick={() => setShowCartModal(true)} style={{ position: 'fixed', bottom: '20px', right: '20px', backgroundColor: '#D5AA55', color: '#000' }}>
+          <ChatIcon />
+        </Fab>
+
+        {/* Chat Modal */}
+        <ChatModal show={showCartModal} onHide={() => setShowCartModal(false)} cartItems={cartItems} />
       </div>
     </Router>
   );
