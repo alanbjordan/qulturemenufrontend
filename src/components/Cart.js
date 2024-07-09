@@ -46,71 +46,74 @@ const CloseButtonContainer = styled('div')({
   justifyContent: 'flex-end',
 });
 
-// Mock submitOrder function
-const submitOrder = async (order) => {
-  // Simulate an API call with a delay
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({ error: false }); // Simulate a successful response
-    }, 2000);
-  });
-};
-
 const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   const [orderStatus, setOrderStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleRemoveItem = (itemId, variantId) => {
-    const updatedCartItems = cartItems.filter(item => item.id !== itemId || (item.selectedVariant && item.selectedVariant.variant_id !== variantId));
+    const updatedCartItems = cartItems.filter(item => item.id !== itemId || (item.selectedChoice && item.selectedChoice.choice_id !== variantId));
     setCartItems(updatedCartItems);
   };
 
   const handleCommentChange = (itemId, variantId, comment) => {
     const updatedCartItems = cartItems.map(item =>
-      item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId ? { ...item, comment } : item
+      item.id === itemId && item.selectedChoice && item.selectedChoice.choice_id === variantId ? { ...item, comment } : item
     );
     setCartItems(updatedCartItems);
   };
 
   const increaseQuantity = (itemId, variantId) => {
     setCartItems(cartItems.map(item =>
-      item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId ? { ...item, quantity: item.quantity + 1 } : item
+      item.id === itemId && item.selectedChoice && item.selectedChoice.choice_id === variantId ? { ...item, quantity: item.quantity + 1 } : item
     ));
   };
 
   const decreaseQuantity = (itemId, variantId) => {
     setCartItems(cartItems.map(item =>
-      item.id === itemId && item.selectedVariant && item.selectedVariant.variant_id === variantId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
+      item.id === itemId && item.selectedChoice && item.selectedChoice.choice_id === variantId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
     ));
   };
 
   const handleSubmitOrder = async () => {
     setLoading(true);
+  
     const order = {
-      table_name: 'Table 2',  // Replace this with the actual table name, or get it from user input
+      table_name: 'Table 2',
       line_items: cartItems.map(item => ({
         item_name: item.item_name,
-        variant_name: item.selectedVariant ? item.selectedVariant.option1_value : '',
         quantity: item.quantity,
-        comment: item.comment || '',
-        modifiers: item.selectedModifiers.map(modifier =>
-          `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''}`
-        ).join(', ')
-      })),
+        comment: item.comment || ''
+      }))
     };
-
-    const result = await submitOrder(order);
-    setLoading(false);
-    if (result.error) {
-      setOrderStatus('Failed to submit order');
-    } else {
-      setOrderStatus('Order submitted successfully');
-      clearCart();
-      onClose();
+  
+    try {
+      const response = await fetch('https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(order)
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        setOrderStatus('Order submitted successfully');
+        clearCart();
+        onClose();
+      } else {
+        setOrderStatus(`Failed to submit order: ${result.error}`);
+      }
+    } catch (error) {
+      setOrderStatus(`Failed to submit order: ${error.message}`);
+    } finally {
+      setLoading(false);
+      setDialogOpen(true);
     }
-    setDialogOpen(true);
   };
+  
+  
 
   const getTotalPrice = () => {
     const total = cartItems.reduce((total, item) => {
@@ -150,21 +153,21 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
                 <>
                   <List>
                     {cartItems.map(item => (
-                      <React.Fragment key={`${item.id}-${item.selectedVariant ? item.selectedVariant.variant_id : 'no-variant'}`}>
+                      <React.Fragment key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
                         <ListItem>
                           <Grid container spacing={1} alignItems="center">
                             <Grid item xs={12}>
                               <ListItemText
                                 primary={`${item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())} - $${item.price}`}
-                                secondary={item.selectedVariant ? `Variant: ${item.selectedVariant.option1_value}` : ''}
+                                secondary={item.selectedChoice ? `Choice: ${item.selectedChoice.option1_value}` : ''}
                                 primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
                               />
                             </Grid>
-                            {item.selectedModifiers && item.selectedModifiers.length > 0 && (
+                            {item.selectedModifiers && item.selectedModifiers.filter(mod => mod.selectedOption).length > 0 && (
                               <Grid item xs={12}>
                                 <Typography variant="body2">
-                                  Modifiers: {item.selectedModifiers.map(modifier =>
-                                    `${modifier.name}: ${modifier.selectedOption && modifier.selectedOption.name ? modifier.selectedOption.name : ''} ${modifier.selectedOption && modifier.selectedOption.price ? `- $${modifier.selectedOption.price}` : ''}`
+                                  Addons: {item.selectedModifiers.filter(mod => mod.selectedOption).map(modifier =>
+                                    `${modifier.selectedOption.name} ${modifier.selectedOption.price ? `- $${modifier.selectedOption.price}` : ''}`
                                   ).join(', ')}
                                 </Typography>
                               </Grid>
@@ -177,18 +180,18 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
                                 fullWidth
                                 margin="dense"
                                 value={item.comment || ''}
-                                onChange={(e) => handleCommentChange(item.id, item.selectedVariant.variant_id, e.target.value)}
+                                onChange={(e) => handleCommentChange(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null, e.target.value)}
                               />
                             </Grid>
                             <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
                               <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
-                              <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id, item.selectedVariant.variant_id)}>
+                              <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null)}>
                                 <RemoveIcon />
                               </IconButton>
-                              <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id, item.selectedVariant.variant_id)}>
+                              <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null)}>
                                 <AddIcon />
                               </IconButton>
-                              <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id, item.selectedVariant.variant_id)}>
+                              <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null)}>
                                 <DeleteIcon />
                               </IconButton>
                             </Grid>
