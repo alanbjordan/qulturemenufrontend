@@ -182,10 +182,35 @@ function App() {
         <BackToTopButton show={showButton} />
         <Cart cartItems={cartItems} setCartItems={setCartItems} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
 
-        {/* Add FAB */}
-        <Fab color="primary" aria-label="chat" onClick={() => setShowCartModal(true)} style={{ position: 'fixed', bottom: '20px', right: '20px', backgroundColor: '#D5AA55', color: '#000' }}>
-          <ChatIcon />
-        </Fab>
+        {/* Add FAB with text */}
+        <div 
+          style={{ 
+            position: 'fixed', 
+            bottom: '20px', 
+            right: '20px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '10px',
+            cursor: 'pointer' // Make the whole container clickable
+          }} 
+          onClick={() => setShowCartModal(true)}
+        >
+          <span 
+            style={{ 
+              color: '#D5AA55', 
+              fontWeight: 'bold', 
+              fontSize: '16px',
+              padding: '8px 12px', 
+              backgroundColor: 'rgba(0, 0, 0, 0.8)', // Adding a semi-transparent background
+              borderRadius: '10px'
+            }}
+          >
+            Chat with Digital Server
+          </span>
+          <Fab color="primary" aria-label="chat" style={{ backgroundColor: '#D5AA55', color: '#000' }}>
+            <ChatIcon />
+          </Fab>
+        </div>
 
         {/* Chat Modal */}
         <ChatModal show={showCartModal} onHide={() => setShowCartModal(false)} cartItems={cartItems} />
