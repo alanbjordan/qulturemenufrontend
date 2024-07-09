@@ -252,10 +252,10 @@ const addToCart = (item) => {
           ))}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleModalClose}>
+          <Button variant="dark" onClick={handleModalClose} >
             Close
           </Button>
-          <Button variant="primary" onClick={handleAddVariantToCart}>
+          <Button variant="secondary" style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }} onClick={handleAddVariantToCart}>
             Add to Cart
           </Button>
         </Modal.Footer>

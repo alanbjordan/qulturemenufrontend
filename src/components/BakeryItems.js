@@ -8,7 +8,7 @@ import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
 import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import DOMPurify from 'dompurify';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Form } from 'react-bootstrap';
 
 const override = css`
   display: block;
@@ -38,10 +38,14 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [shakingButtonId, setShakingButtonId] = useState(null); // Track the button to shake
   const [modalShow, setModalShow] = useState(false);
   const [modalContent, setModalContent] = useState({});
+  const [selectedVariant, setSelectedVariant] = useState(null); // State to manage selected variant
+  const [modifiers, setModifiers] = useState([]); // State to manage modifiers
+  const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
 
   useEffect(() => {
     const getMenuItems = async () => {
       const items = await fetchMenuItems();
+      console.log("Fetched items:", items); // Log fetched items to the console
       const bakeryItems = items.filter(item => item.category_id === '4fd81f0d-d796-4538-b04d-6fdcd85758ee'); // Bakery category ID
       setBakeryItems(bakeryItems);
       setTotalImages(bakeryItems.length);
@@ -51,7 +55,7 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       await getMenuItems(); // Fetch data in the background
       setTimeout(() => {
         setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 500); // Wait for 3 seconds
+      }, 10); // Wait for 3 seconds
     };
 
     loadData();
@@ -68,22 +72,88 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   };
 
   const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => cartItem.id === item.id);
+    const existingItem = cartItems.find(cartItem =>
+      cartItem.id === item.id &&
+      (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
+      JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
+    );
+    const itemPrice = selectedVariant ? selectedVariant.default_price : item.default_price;
     if (existingItem) {
       setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id ? { ...cartItem, quantity: cartItem.quantity + 1 } : cartItem
+        cartItem.id === item.id &&
+        (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
+        JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
+          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1 }]);
+      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers: modifiers, price: itemPrice }]);
     }
-    // Trigger shake animation
-    setShakingButtonId(item.id);
-    setTimeout(() => setShakingButtonId(null), 500); // Adjust duration as needed
+    setModalShow(false);
+    setLoadingButtonId(item.id); // Start spinner
+    setTimeout(() => {
+      setLoadingButtonId(null); // Stop spinner
+      setShakingButtonId(item.id); // Start shaking
+      setTimeout(() => {
+        setShakingButtonId(null); // Stop shaking
+        setTimeout(() => {
+          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
+        }, 500); // Delay before reverting to "Add to Cart"
+      }, 500); // Duration of shake animation
+    }, 500); // Duration of spinner before modal opens
   };
 
-  const handleModalShow = (item) => {
+  const handleAddToCartClick = async (item) => {
+    setLoadingButtonId(item.id); // Start spinner
+    if (item.modifier_ids && item.modifier_ids.length > 0) {
+      try {
+        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]); // Fetch the first modifier ID only
+        console.log('Fetched modifier:', fetchedModifier);
+        setModifiers([fetchedModifier]);
+      } catch (error) {
+        console.error('Error fetching modifier:', error);
+      }
+    } else {
+      setModifiers([]);
+    }
     setModalContent(item);
-    setModalShow(true);
+    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
+    setTimeout(() => {
+      setModalShow(true);
+      setLoadingButtonId(null); // Stop spinner once modal opens
+    }, 500); // Adjust duration as needed
+  };
+
+  const fetchModifierData = async (modifierId) => {
+    const response = await fetch(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/modifiers?modifier_id=${modifierId}`);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return await response.json();
+  };
+
+  const handleModalClose = () => {
+    setModalShow(false);
+    setLoadingButtonId(null); // Reset loading state if modal is closed without adding
+  };
+
+  const handleVariantChange = (event) => {
+    const variantId = event.target.value;
+    const variant = modalContent.variants.find(v => v.variant_id === variantId);
+    setSelectedVariant(variant);
+  };
+
+  const handleModifierChange = (event, modifierIndex) => {
+    const selectedOptionId = event.target.value;
+    const selectedOption = selectedOptionId ? modifiers[modifierIndex].modifier_options.find(option => option.id === selectedOptionId) : null;
+    const newModifiers = [...modifiers];
+    newModifiers[modifierIndex].selectedOption = selectedOption || {}; // Ensure selectedOption is always an object
+    setModifiers(newModifiers);
+  };
+
+  const handleAddVariantToCart = () => {
+    const itemWithVariant = { ...modalContent, selectedVariant, selectedModifiers: modifiers };
+    addToCart(itemWithVariant);
   };
 
   if (loading) {
@@ -108,18 +178,28 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
                   <div>
                     <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
-                    <h6 className="card-text">${item.variants[0].default_price}</h6>
+                    {item.variants && item.variants.length > 0 ? (
+                      <h6 className="card-text">${item.variants[0].default_price}</h6>
+                    ) : (
+                      <h6 className="card-text">${item.default_price}</h6>
+                    )}
                     {item.description && (
-                      <Button variant="link" onClick={() => handleModalShow(item)}>
+                      <Button variant="link" onClick={() => handleAddToCartClick(item)}>
                         View Description
                       </Button>
                     )}
                   </div>
                   <button
                     className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
-                    onClick={() => addToCart(item)}
+                    onClick={() => handleAddToCartClick(item)}
                   >
-                    Add to Cart
+                    {loadingButtonId === item.id ? (
+                      <ClipLoader color={"#ffffff"} loading={true} size={15} />
+                    ) : shakingButtonId === item.id ? (
+                      "Adding"
+                    ) : (
+                      "Add to Cart"
+                    )}
                   </button>
                 </div>
                 <img
@@ -137,14 +217,44 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         </div>
       </div>
 
-      <Modal show={modalShow} onHide={() => setModalShow(false)}>
+      <Modal show={modalShow} onHide={handleModalClose}>
         <Modal.Header closeButton>
           <Modal.Title>{modalContent.item_name}</Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ color: 'black' }} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></Modal.Body>
+        <Modal.Body style={{ color: 'black' }}>
+          <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></div>
+          {modalContent.variants && modalContent.variants.length > 1 && (
+            <Form.Group controlId="variantSelect">
+              <Form.Label>Select Variant</Form.Label>
+              <Form.Control as="select" value={selectedVariant ? selectedVariant.variant_id : ''} onChange={handleVariantChange}>
+                {modalContent.variants.map(variant => (
+                  <option key={variant.variant_id} value={variant.variant_id}>
+                    {variant.option1_value} - ${variant.default_price}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          )}
+          {modifiers.map((modifier, index) => (
+            <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
+              <Form.Label>{modifier.name}</Form.Label>
+              <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
+                <option value="">None</option> {/* Add default None option */}
+                {modifier.modifier_options.map(option => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} - ${option.price}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          ))}
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setModalShow(false)}>
+          <Button variant="dark" onClick={handleModalClose} >
             Close
+          </Button>
+          <Button variant="secondary" style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }} onClick={handleAddVariantToCart}>
+            Add to Cart
           </Button>
         </Modal.Footer>
       </Modal>
