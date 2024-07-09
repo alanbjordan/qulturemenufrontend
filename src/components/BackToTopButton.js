@@ -1,17 +1,28 @@
-// BackToTopButton.js
 import React from 'react';
-import '../App.css'; // Make sure to create this CSS file for styling
+import { Fab } from '@mui/material';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 
 const BackToTopButton = ({ show }) => {
-  const handleClick = () => {
+  const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     show && (
-      <button className="back-to-top" onClick={handleClick}>
-        ↑ Back to Top
-      </button>
+      <Fab 
+        color="primary" 
+        aria-label="back to top" 
+        onClick={handleScrollToTop} 
+        style={{ 
+          position: 'fixed', 
+          bottom: '20px', 
+          right: '370px', // Adjust position if needed
+          backgroundColor: '#D5AA55', 
+          color: '#000'
+        }}
+      >
+        <ArrowUpwardIcon />
+      </Fab>
     )
   );
 };
