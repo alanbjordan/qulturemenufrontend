@@ -41,6 +41,7 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [modalContent, setModalContent] = useState({});
   const [selectedVariant, setSelectedVariant] = useState(null); // State to manage selected variant
   const [modifiers, setModifiers] = useState([]); // State to manage modifiers
+  const [selectedModifiers, setSelectedModifiers] = useState([]); // State to manage selected modifiers
   const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
 
   useEffect(() => {
@@ -82,19 +83,19 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     const existingItem = cartItems.find(cartItem =>
       cartItem.id === item.id &&
       (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
-      JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
+      JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
     );
     const itemPrice = selectedVariant ? selectedVariant.default_price : item.default_price;
     if (existingItem) {
       setCartItems(cartItems.map(cartItem =>
         cartItem.id === item.id &&
         (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
-        JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(modifiers)
+        JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
           ? { ...cartItem, quantity: cartItem.quantity + 1 }
           : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers: modifiers, price: itemPrice }]);
+      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
     setLoadingButtonId(item.id); // Start spinner
@@ -125,6 +126,7 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     }
     setModalContent(item);
     setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
+    setSelectedModifiers([]); // Reset selected modifiers
     setTimeout(() => {
       setModalShow(true);
       setLoadingButtonId(null); // Stop spinner once modal opens
@@ -153,13 +155,32 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const handleModifierChange = (event, modifierIndex) => {
     const selectedOptionId = event.target.value;
     const selectedOption = selectedOptionId ? modifiers[modifierIndex].modifier_options.find(option => option.id === selectedOptionId) : null;
-    const newModifiers = [...modifiers];
-    newModifiers[modifierIndex].selectedOption = selectedOption || {}; // Ensure selectedOption is always an object
-    setModifiers(newModifiers);
+
+    // Update selected option for the given modifier
+    setModifiers(modifiers => {
+      const newModifiers = [...modifiers];
+      newModifiers[modifierIndex].selectedOption = selectedOption;
+      return newModifiers;
+    });
+  };
+
+  const handleAddModifier = (modifierIndex) => {
+    const modifier = modifiers[modifierIndex];
+    const selectedOption = modifier.selectedOption;
+
+    if (selectedOption) {
+      setSelectedModifiers(prevSelectedModifiers => [
+        ...prevSelectedModifiers,
+        {
+          ...modifier,
+          selectedOption,
+        },
+      ]);
+    }
   };
 
   const handleAddVariantToCart = () => {
-    const itemWithVariant = { ...modalContent, selectedVariant, selectedModifiers: modifiers };
+    const itemWithVariant = { ...modalContent, selectedVariant, selectedModifiers };
     addToCart(itemWithVariant);
   };
 
@@ -276,7 +297,7 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></div>
           {modalContent.variants && modalContent.variants.length > 1 && (
             <Form.Group controlId="variantSelect">
-              <Form.Label>Select Variant</Form.Label>
+              <Form.Label>Select Option</Form.Label>
               <Form.Control as="select" value={selectedVariant ? selectedVariant.variant_id : ''} onChange={handleVariantChange}>
                 {modalContent.variants.map(variant => (
                   <option key={variant.variant_id} value={variant.variant_id}>
@@ -288,17 +309,32 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           )}
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
-              <Form.Label>{modifier.name}</Form.Label>
-              <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
-                <option value="">None</option> {/* Add default None option */}
-                {modifier.modifier_options.map(option => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} - ${option.price}
-                  </option>
-                ))}
-              </Form.Control>
+              <Form.Label>Select Add-ons</Form.Label>
+              <div className="d-flex">
+                <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
+                  <option value="">None</option> {/* Add default None option */}
+                  {modifier.modifier_options.map(option => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} - ${option.price}
+                    </option>
+                  ))}
+                </Form.Control>
+                <Button variant="secondary" className="ml-2" onClick={() => handleAddModifier(index)} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }}>
+                  Add Selection
+                </Button>
+              </div>
             </Form.Group>
           ))}
+          {selectedModifiers.length > 0 && (
+            <div>
+              <h6>Selected Add-ons:</h6>
+              <ul>
+                {selectedModifiers.map((modifier, index) => (
+                  <li key={index}>{modifier.selectedOption.name} - ${modifier.selectedOption.price}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </Modal.Body>
         <Modal.Footer>
           <Button variant="dark" onClick={handleModalClose} >
