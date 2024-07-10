@@ -83,7 +83,9 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
       line_items: cartItems.map(item => ({
         item_name: item.item_name,
         quantity: item.quantity,
-        comment: item.comment || ''
+        comment: item.comment || '',
+        selectedVariant: item.selectedVariant || null,
+        selectedModifiers: item.selectedModifiers || []
       }))
     };
   
@@ -111,7 +113,8 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
       setLoading(false);
       setDialogOpen(true);
     }
-  };
+};
+
   
   
 
