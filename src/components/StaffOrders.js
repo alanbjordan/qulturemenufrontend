@@ -51,7 +51,7 @@ const StaffOrders = () => {
         const data = response.data;
 
         const groupedOrders = data.reduce((acc, order) => {
-          const { order_id, table_name, item_name, quantity, comment } = order;
+          const { order_id, table_name, item_name, quantity, comment, selected_variant, selected_modifiers } = order;
           if (!acc[order_id]) {
             acc[order_id] = {
               order_id,
@@ -59,7 +59,7 @@ const StaffOrders = () => {
               items: []
             };
           }
-          acc[order_id].items.push({ item_name, quantity, comment });
+          acc[order_id].items.push({ item_name, quantity, comment, selected_variant, selected_modifiers });
           return acc;
         }, {});
 
@@ -147,6 +147,23 @@ const StaffOrders = () => {
                     <div><strong>Quantity:</strong> {item.quantity}</div>
                     <div><strong>Item:</strong> {item.item_name}</div>
                     {item.comment && <div><strong>Comment:</strong> {item.comment}</div>}
+                    {item.selected_variant && (
+                      <div>
+                        <strong>Selected Option:</strong> {item.selected_variant.option1_value || 'N/A'}
+                      </div>
+                    )}
+                    {item.selected_modifiers && item.selected_modifiers.length > 0 && (
+                      <div>
+                        <strong>Addons:</strong> 
+                        <ul>
+                          {item.selected_modifiers.map((mod, modIndex) => (
+                            <li key={modIndex}>
+                              {mod.selectedOption.name} - ฿{mod.selectedOption.price}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
