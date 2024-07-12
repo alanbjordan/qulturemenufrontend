@@ -6,7 +6,7 @@ import { Card, Button, Spinner, Alert } from 'react-bootstrap';
 import ClipLoader from 'react-spinners/ClipLoader';
 import { css } from '@emotion/react';
 
-const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com';
+const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
 const socket = io(BASE_URL, {
   transports: ['websocket', 'polling']
 });
