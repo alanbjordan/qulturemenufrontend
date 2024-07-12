@@ -3,7 +3,7 @@ import axios from 'axios';
 import io from 'socket.io-client';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Card, Button, Spinner, Alert } from 'react-bootstrap';
-import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
+import ClipLoader from 'react-spinners/ClipLoader';
 import { css } from '@emotion/react';
 
 const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
@@ -51,15 +51,16 @@ const StaffOrders = () => {
         const data = response.data;
 
         const groupedOrders = data.reduce((acc, order) => {
-          const { order_id, table_name, item_name, quantity, comment, selected_variant, selected_modifiers } = order;
+          const { order_id, table_name, comment, item_name, quantity, selected_variant, selected_modifiers } = order;
           if (!acc[order_id]) {
             acc[order_id] = {
               order_id,
               table_name,
+              comment,
               items: []
             };
           }
-          acc[order_id].items.push({ item_name, quantity, comment, selected_variant, selected_modifiers });
+          acc[order_id].items.push({ item_name, quantity, selected_variant, selected_modifiers });
           return acc;
         }, {});
 
@@ -133,6 +134,12 @@ const StaffOrders = () => {
           <Card.Header style={{ fontWeight: 500 }}>Table: {order.table_name}</Card.Header>
           <Card.Body>
             <Card.Title style={{ fontWeight: 700 }}>Order ID: {order.order_id}</Card.Title>
+            {order.comment && (
+              <>
+                <div><strong>Comment:</strong> {order.comment}</div>
+                <hr />
+              </>
+            )}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{ border: '1px solid #ddd', padding: '10px', borderRadius: '5px', textAlign: 'left', width: '75%' }}>
                 {order.items.map((item, index) => (
@@ -146,7 +153,6 @@ const StaffOrders = () => {
                   >
                     <div><strong>Quantity:</strong> {item.quantity}</div>
                     <div><strong>Item:</strong> {item.item_name}</div>
-                    {item.comment && <div><strong>Comment:</strong> {item.comment}</div>}
                     {item.selected_variant && (
                       <div>
                         <strong>Selected Option:</strong> {item.selected_variant.option1_value || 'N/A'}
