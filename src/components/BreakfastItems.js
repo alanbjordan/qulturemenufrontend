@@ -9,6 +9,8 @@ import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import DOMPurify from 'dompurify';
 import { Modal, Button, Form } from 'react-bootstrap';
+import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
 
 const override = css`
   display: block;
@@ -42,6 +44,8 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [modifiers, setModifiers] = useState([]); // State to manage modifiers
   const [selectedModifiers, setSelectedModifiers] = useState([]); // State to manage selected modifiers
   const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
+  const [quantity, setQuantity] = useState(1); // State to manage quantity
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -77,11 +81,11 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         cartItem.id === item.id && 
         (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
         JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          ? { ...cartItem, quantity: cartItem.quantity + quantity }
           : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers, price: itemPrice }]);
+      setCartItems([...cartItems, { ...item, quantity, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
     setLoadingButtonId(item.id); // Start spinner
@@ -93,6 +97,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       }, 500); // Duration of shake animation
     }, 500); // Duration of spinner before modal opens
   };
+  
 
   const handleAddToCartClick = async (item) => {
     setLoadingButtonId(item.id); // Start spinner
@@ -109,9 +114,11 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     setModalContent(item);
     setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
     setSelectedModifiers([]); // Reset selected modifiers
+    setQuantity(1); // Reset quantity
     setModalShow(true);
     setLoadingButtonId(null); // Stop spinner once modal opens
   };
+  
 
   const fetchModifierData = async (modifierId) => {
     const response = await fetch(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/modifiers?modifier_id=${modifierId}`);
@@ -163,6 +170,13 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     const itemWithVariant = { ...modalContent, selectedVariant, selectedModifiers };
     addToCart(itemWithVariant);
   };
+
+  const handleRemoveModifier = (index) => {
+    setSelectedModifiers(prevSelectedModifiers => 
+      prevSelectedModifiers.filter((_, i) => i !== index)
+    );
+  };
+  
 
   if (loading) {
     return (
@@ -266,11 +280,34 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <h6>Selected Add-ons:</h6>
               <ul>
                 {selectedModifiers.map((modifier, index) => (
-                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
+                  <li key={index}>
+                    {modifier.selectedOption.name} - ฿{modifier.selectedOption.price}
+                    <Button variant="danger" size="sm" onClick={() => handleRemoveModifier(index)} style={{ marginLeft: '10px' }}>
+                      Remove
+                    </Button>
+                  </li>
                 ))}
               </ul>
             </div>
           )}
+
+          <Form.Group controlId="quantitySelect">
+            <Form.Label>Quantity</Form.Label>
+            <div className="d-flex align-items-center">
+              <Button variant="secondary" onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>
+                <RemoveIcon />
+              </Button>
+              <Form.Control 
+                type="text" 
+                value={quantity} 
+                readOnly
+                style={{ width: '60px', textAlign: 'center', margin: '0 10px' }} 
+              />
+              <Button variant="secondary" onClick={() => setQuantity(quantity + 1)}>
+                <AddIcon />
+              </Button>
+            </div>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="dark" onClick={handleModalClose}>
