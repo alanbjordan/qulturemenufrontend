@@ -4,9 +4,6 @@ import {
   ListItemText, Grid, CircularProgress, Dialog, DialogActions, DialogContent,
   DialogContentText, DialogTitle, Divider, TextField
 } from '@mui/material';
-import RemoveIcon from '@mui/icons-material/Remove';
-import AddIcon from '@mui/icons-material/Add';
-import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import { styled } from '@mui/material/styles';
 
@@ -51,23 +48,6 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [cartComment, setCartComment] = useState('');
-
-  const handleRemoveItem = (itemId, variantId) => {
-    const updatedCartItems = cartItems.filter(item => item.id !== itemId || (item.selectedChoice && item.selectedChoice.choice_id !== variantId));
-    setCartItems(updatedCartItems);
-  };
-
-  const increaseQuantity = (itemId, variantId) => {
-    setCartItems(cartItems.map(item =>
-      item.id === itemId && item.selectedChoice && item.selectedChoice.choice_id === variantId ? { ...item, quantity: item.quantity + 1 } : item
-    ));
-  };
-
-  const decreaseQuantity = (itemId, variantId) => {
-    setCartItems(cartItems.map(item =>
-      item.id === itemId && item.selectedChoice && item.selectedChoice.choice_id === variantId && item.quantity > 1 ? { ...item, quantity: item.quantity - 1 } : item
-    ));
-  };
 
   const handleSubmitOrder = async () => {
     setLoading(true);
@@ -144,43 +124,40 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
               {cartItems.length > 0 ? (
                 <>
                   <List>
-                    {cartItems.map(item => (
-                      <React.Fragment key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
-                        <ListItem key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
-                          <Grid container spacing={1} alignItems="center">
-                            <Grid item xs={12}>
-                              <ListItemText
-                                primary={`${item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())} - ฿${item.price}`}
-                                secondary={item.selectedChoice ? `Choice: ${item.selectedChoice.option1_value}` : ''}
-                                primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
-                              />
-                            </Grid>
-                            {item.selectedModifiers && item.selectedModifiers.filter(mod => mod.selectedOption).length > 0 && (
-                              <Grid item xs={12}>
-                                <Typography variant="body2">
-                                  Addons: {item.selectedModifiers.filter(mod => mod.selectedOption).map(modifier =>
-                                    `${modifier.selectedOption.name} ${modifier.selectedOption.price ? `- ฿${modifier.selectedOption.price}` : ''}`
-                                  ).join(', ')}
-                                </Typography>
-                              </Grid>
-                            )}
-                            <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
-                              <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
-                              <IconButton edge="end" aria-label="decrease" onClick={() => decreaseQuantity(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null)}>
-                                <RemoveIcon />
-                              </IconButton>
-                              <IconButton edge="end" aria-label="increase" onClick={() => increaseQuantity(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null)}>
-                                <AddIcon />
-                              </IconButton>
-                              <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveItem(item.id, item.selectedChoice ? item.selectedChoice.choice_id : null)}>
-                                <DeleteIcon />
-                              </IconButton>
-                            </Grid>
+                  {cartItems.map(item => (
+                    <React.Fragment key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
+                      <ListItem key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
+                        <Grid container spacing={1} alignItems="center">
+                          <Grid item xs={12}>
+                            <ListItemText
+                              primary={`${item.item_name.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase())} - ฿${item.price}`}
+                              secondary={
+                                <>
+                                  {`Option: ${item.selectedVariant && item.selectedVariant.option1_value ? item.selectedVariant.option1_value : 'None'}`}
+                                  {item.selectedChoice && ` | Choice: ${item.selectedChoice.option1_value}`}
+                                </>
+                              }
+                              primaryTypographyProps={{ style: { fontWeight: 'bold' } }}
+                            />
                           </Grid>
-                        </ListItem>
-                        <Divider />
-                      </React.Fragment>
-                    ))}
+                          {item.selectedModifiers && item.selectedModifiers.filter(mod => mod.selectedOption).length > 0 && (
+                            <Grid item xs={12}>
+                              <Typography variant="body2">
+                                Addons: {item.selectedModifiers.filter(mod => mod.selectedOption).map(modifier =>
+                                  `${modifier.selectedOption.name} ${modifier.selectedOption.price ? `- ฿${modifier.selectedOption.price}` : ''}`
+                                ).join(', ')}
+                              </Typography>
+                            </Grid>
+                          )}
+                          <Grid item xs={12} style={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography variant="body2" style={{ marginRight: '10px' }}>Quantity: {item.quantity}</Typography>
+                          </Grid>
+                        </Grid>
+                      </ListItem>
+                      <Divider />
+                    </React.Fragment>
+                  ))}
+
                   </List>
                   <Typography variant="h6" style={{ textAlign: 'center', padding: '20px' }}>Total Price: ฿{getTotalPrice()}</Typography>
                   <TextField
