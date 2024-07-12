@@ -201,9 +201,9 @@ const BrunchItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <div>
                     <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
                     {item.variants && item.variants.length > 0 ? (
-                      <h6 className="card-text">${item.variants[0].default_price}</h6>
+                      <h6 className="card-text">฿{item.variants[0].default_price}</h6>
                     ) : (
-                      <h6 className="card-text">${item.default_price}</h6>
+                      <h6 className="card-text">฿{item.default_price}</h6>
                     )}
                     {item.description && (
                       <Button variant="link" onClick={() => handleAddToCartClick(item)}>
@@ -251,7 +251,7 @@ const BrunchItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <Form.Control as="select" value={selectedVariant ? selectedVariant.variant_id : ''} onChange={handleVariantChange}>
                 {modalContent.variants.map(variant => (
                   <option key={variant.variant_id} value={variant.variant_id}>
-                    {variant.option1_value} - ${variant.default_price}
+                    {variant.option1_value} - ฿{variant.default_price}
                   </option>
                 ))}
               </Form.Control>
@@ -265,7 +265,7 @@ const BrunchItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <option value="">None</option> {/* Add default None option */}
                   {modifier.modifier_options.map(option => (
                     <option key={option.id} value={option.id}>
-                      {option.name} - ${option.price}
+                      {option.name} - ฿{option.price}
                     </option>
                   ))}
                 </Form.Control>
@@ -280,7 +280,7 @@ const BrunchItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <h6>Selected Add-ons:</h6>
               <ul>
                 {selectedModifiers.map((modifier, index) => (
-                  <li key={index}>{modifier.selectedOption.name} - ${modifier.selectedOption.price}</li>
+                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
                 ))}
               </ul>
             </div>

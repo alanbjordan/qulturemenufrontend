@@ -44,20 +44,12 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
 
   useEffect(() => {
-    const getMenuItems = async () => {
+    const loadData = async () => {
       const items = await fetchMenuItems();
-      console.log("Fetched items:", items); // Log fetched items to the console
-
       const breakfastItems = items.filter(item => item.category_id === '754001f2-9338-4933-8d06-39c9718ee391'); // Breakfast category ID
       setBreakfastItems(breakfastItems);
       setTotalImages(breakfastItems.length);
-    };
-
-    const loadData = async () => {
-      await getMenuItems(); // Fetch data in the background
-      setTimeout(() => {
-        setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 10); // Wait for 3 seconds
+      setLoading(false); // Set loading to false after data is fetched
     };
 
     loadData();
@@ -98,23 +90,18 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setShakingButtonId(item.id); // Start shaking
       setTimeout(() => {
         setShakingButtonId(null); // Stop shaking
-        setTimeout(() => {
-          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
-        }, 500); // Delay before reverting to "Add to Cart"
       }, 500); // Duration of shake animation
     }, 500); // Duration of spinner before modal opens
   };
-
 
   const handleAddToCartClick = async (item) => {
     setLoadingButtonId(item.id); // Start spinner
     if (item.modifier_ids && item.modifier_ids.length > 0) {
       try {
-        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]); // Fetch the first modifier ID only
-        console.log('Fetched modifier:', fetchedModifier);
-        setModifiers([fetchedModifier]);
+        const fetchedModifiers = await Promise.all(item.modifier_ids.map(fetchModifierData));
+        setModifiers(fetchedModifiers);
       } catch (error) {
-        console.error('Error fetching modifier:', error);
+        console.error('Error fetching modifiers:', error);
       }
     } else {
       setModifiers([]);
@@ -122,10 +109,8 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     setModalContent(item);
     setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
     setSelectedModifiers([]); // Reset selected modifiers
-    setTimeout(() => {
-      setModalShow(true);
-      setLoadingButtonId(null); // Stop spinner once modal opens
-    }, 500); // Adjust duration as needed
+    setModalShow(true);
+    setLoadingButtonId(null); // Stop spinner once modal opens
   };
 
   const fetchModifierData = async (modifierId) => {
@@ -202,9 +187,9 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <div>
                     <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
                     {item.variants && item.variants.length > 0 ? (
-                      <h6 className="card-text">${item.variants[0].default_price}</h6>
+                      <h6 className="card-text">฿{item.variants[0].default_price}</h6>
                     ) : (
-                      <h6 className="card-text">${item.default_price}</h6>
+                      <h6 className="card-text">฿{item.default_price}</h6>
                     )}
                     {item.description && (
                       <Button variant="link" onClick={() => handleAddToCartClick(item)}>
@@ -252,7 +237,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <Form.Control as="select" value={selectedVariant ? selectedVariant.variant_id : ''} onChange={handleVariantChange}>
                 {modalContent.variants.map(variant => (
                   <option key={variant.variant_id} value={variant.variant_id}>
-                    {variant.option1_value} - ${variant.default_price}
+                    {variant.option1_value} - ฿{variant.default_price}
                   </option>
                 ))}
               </Form.Control>
@@ -260,13 +245,13 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           )}
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
-              <Form.Label>Select Add-ons</Form.Label>
+              <Form.Label>{modifier.name}</Form.Label>
               <div className="d-flex">
                 <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
                   <option value="">None</option> {/* Add default None option */}
                   {modifier.modifier_options.map(option => (
                     <option key={option.id} value={option.id}>
-                      {option.name} - ${option.price}
+                      {option.name} - ฿{option.price}
                     </option>
                   ))}
                 </Form.Control>
@@ -281,14 +266,14 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <h6>Selected Add-ons:</h6>
               <ul>
                 {selectedModifiers.map((modifier, index) => (
-                  <li key={index}>{modifier.selectedOption.name} - ${modifier.selectedOption.price}</li>
+                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
                 ))}
               </ul>
             </div>
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="dark" onClick={handleModalClose} >
+          <Button variant="dark" onClick={handleModalClose}>
             Close
           </Button>
           <Button variant="secondary" style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }} onClick={handleAddVariantToCart}>
