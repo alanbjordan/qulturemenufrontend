@@ -171,6 +171,22 @@ ul, li {
   color: #000;
 }
 
+/* App.css */
+.navbar-fixed-top {
+  position: fixed;
+  width: 100%;
+  z-index: 1030;
+  top: 0;
+  left: 0;
+}
+
+.content {
+  margin-top: 56px; /* Adjust based on the height of your navbar */
+}
+
+.main {
+  margin-top: 56px; /* Adjust based on the height of your navbar */
+}
 
 /* Spinner animation */
 @keyframes spin {

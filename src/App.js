@@ -100,7 +100,7 @@ function App() {
         return <SaturdaySpecialItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
       default:
         return (
-          <div className="container">
+          <div className="container content">
             <header className='Logo-header text-center p-3'>
               <img src={menuHeader} alt='Qulture' className='img-fluid mb-3' />
             </header>
@@ -143,7 +143,7 @@ function App() {
   return (
     <Router>
       <div className="App bg-black">
-        <Navbar bg="black" variant="dark" expand="lg" className="d-flex justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
+        <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
           <Container className="d-flex justify-content-between align-items-center">
             <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
             <a href="/" onClick={() => window.location.reload()}>
