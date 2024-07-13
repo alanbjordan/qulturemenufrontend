@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Alert } from 'react-bootstrap';
 import { Typography } from '@mui/material';
+import '../App.css'; // Make sure to import your CSS file
 
 const ChatModal = ({ show, onHide }) => {
   const [messages, setMessages] = useState([]);
@@ -68,7 +69,7 @@ const ChatModal = ({ show, onHide }) => {
   };
 
   return (
-    <Modal show={show} onHide={onHide}>
+    <Modal show={show} onHide={onHide} dialogClassName={show ? 'modal-pulse' : ''}>
       <Modal.Header closeButton>
         <Modal.Title>Welcome</Modal.Title>
       </Modal.Header>
