@@ -32,6 +32,7 @@ import StaffOrders from './components/StaffOrders';
 import CreatePass from './components/CreatePass';
 import Cart from './components/Cart';
 import ChatModal from './components/ChatModal';
+import StaffDashboard from './components/StaffDashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
@@ -175,6 +176,7 @@ function App() {
         <Routes>
           <Route path="/" element={renderContent()} />
           <Route path="/login" element={<Login />} />
+          <Route path="/staff-dashboard" element={<StaffDashboard />} />
           <Route path="/staff-orders" element={<StaffOrders />} />
           <Route path="/create-pass" element={<CreatePass />} />
           <Route path="*" element={<Navigate to="/" />} />

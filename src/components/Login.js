@@ -30,13 +30,14 @@ const Login = () => {
     setLoading(true); // Set loading to true
     setTimeout(() => {
       if (username === 'admin' && password === 'admin1234') {
-        navigate('/staff-orders');
+        navigate('/staff-dashboard'); // Navigate to StaffDashboard
       } else {
         setError('Invalid credentials');
       }
       setLoading(false); // Set loading to false after login process
     }, 2000); // Simulate a delay for the login process
   };
+  
 
   return (
     <div className="login-wrapper">
