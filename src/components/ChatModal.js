@@ -53,9 +53,10 @@ const ChatModal = ({ show, onHide }) => {
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      messagesEndRef.current.scrollIntoView({ behavior: 'auto', block: 'end' });
     }
-  }, [messages]);
+  }, [messages, displayedMessage]);
+  
 
   useEffect(() => {
     if (show) {
@@ -85,6 +86,12 @@ const ChatModal = ({ show, onHide }) => {
       return () => clearInterval(intervalId);
     }
   }, [currentAssistantMessage]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [displayedMessage]);
 
   const messageStyle = {
     padding: '10px',
