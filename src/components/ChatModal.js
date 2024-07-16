@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Alert } from 'react-bootstrap';
 import { Typography } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
-import '../App.css'; // Ensure your CSS file is imported
+import '../App.css';
 
 const ChatModal = ({ show, onHide }) => {
   const [messages, setMessages] = useState([]);
