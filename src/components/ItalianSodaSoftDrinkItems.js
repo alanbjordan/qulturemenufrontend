@@ -189,7 +189,11 @@ const ItalianSodaSoftDrinkItems = ({ goToMainMenu, cartItems, setCartItems }) =>
   }
 
   // Combine items and sort to prioritize soft drinks
-  const combinedItems = [...softDrinkItems, ...italianSodaItems];
+  const combinedItems = [...italianSodaItems, ...softDrinkItems].sort((a, b) => {
+    const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+    const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+    return priceB - priceA;
+  });
 
   return (
     <div className='main'>

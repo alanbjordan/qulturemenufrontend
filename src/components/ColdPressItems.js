@@ -49,15 +49,22 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       console.log("Fetched items:", items); // Log fetched items to the console
 
       const coldPressItems = items.filter(item => item.category_id === 'bbc87f14-65e0-4ce8-93b5-b25747fc212c'); // Cold press juice category ID
-      setColdPressItems(coldPressItems);
-      setTotalImages(coldPressItems.length);
+
+      const sortedItems = coldPressItems.sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
+
+      setColdPressItems(sortedItems);
+      setTotalImages(sortedItems.length);
     };
 
     const loadData = async () => {
       await getMenuItems(); // Fetch data in the background
       setTimeout(() => {
         setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 10); // Wait for 3 seconds
+      }, 3000); // Wait for 3 seconds
     };
 
     loadData();

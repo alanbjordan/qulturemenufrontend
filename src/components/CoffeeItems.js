@@ -31,8 +31,7 @@ const toTitleCase = (str) => {
 };
 
 const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
-  const [hotCoffeeItems, setHotCoffeeItems] = useState([]);
-  const [nonHotCoffeeItems, setNonHotCoffeeItems] = useState([]);
+  const [allCoffeeItems, setAllCoffeeItems] = useState([]);
   const [loading, setLoading] = useState(true); // State to manage loading
   const [imagesLoaded, setImagesLoaded] = useState(0); // Track the number of images loaded
   const [totalImages, setTotalImages] = useState(0); // Track the total number of images
@@ -49,21 +48,24 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       const items = await fetchMenuItems();
       console.log("Fetched items:", items); // Log fetched items to the console
 
-      const coffeeItems = items.filter(item => item.category_id === '3e55f2ba-7526-4a17-b146-04c93b88a789'); // Replace with actual Coffee category ID
+      const coffeeItems = items.filter(item => item.category_id === '3e55f2ba-7526-4a17-b146-04c93b88a789'); // Coffee category ID
+      const additionalCategoryItems = items.filter(item => item.category_id === 'dc381a96-eedf-420a-84b3-c78aee13be91'); // Additional category ID
 
-      const hotItems = coffeeItems.filter(item => item.item_name.toLowerCase().includes('hot'));
-      const nonHotItems = coffeeItems.filter(item => !item.item_name.toLowerCase().includes('hot'));
+      const allItems = [...coffeeItems, ...additionalCategoryItems].sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
 
-      setHotCoffeeItems(hotItems);
-      setNonHotCoffeeItems(nonHotItems);
-      setTotalImages(hotItems.length + nonHotItems.length);
+      setAllCoffeeItems(allItems);
+      setTotalImages(allItems.length);
     };
 
     const loadData = async () => {
       await getMenuItems(); // Fetch data in the background
       setTimeout(() => {
         setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 10); // Wait for 3 seconds
+      }, 3000); // Wait for 3 seconds
     };
 
     loadData();
@@ -104,9 +106,6 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setShakingButtonId(item.id); // Start shaking
       setTimeout(() => {
         setShakingButtonId(null); // Stop shaking
-        setTimeout(() => {
-          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
-        }, 500); // Delay before reverting to "Add to Cart"
       }, 500); // Duration of shake animation
     }, 500); // Duration of spinner before modal opens
   };
@@ -200,51 +199,7 @@ const CoffeeItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       <button className='custom-button' onClick={goToMainMenu}>Back</button>
       <div className="container">
         <div className="row">
-          {hotCoffeeItems.map(item => (
-            <div key={item.id} className="col-md-12 mb-4">
-              <div className="card h-100 d-flex flex-row align-items-center">
-                <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
-                  <div>
-                    <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
-                    {item.variants && item.variants.length > 0 ? (
-                      <h6 className="card-text">${item.variants[0].default_price}</h6>
-                    ) : (
-                      <h6 className="card-text">${item.default_price}</h6>
-                    )}
-                    {item.description && (
-                      <Button variant="link" onClick={() => handleAddToCartClick(item)}>
-                        View Description
-                      </Button>
-                    )}
-                  </div>
-                  <button
-                    className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
-                    onClick={() => handleAddToCartClick(item)}
-                  >
-                    {loadingButtonId === item.id ? (
-                      <ClipLoader color={"#ffffff"} loading={true} size={15} />
-                    ) : shakingButtonId === item.id ? (
-                      "Adding"
-                    ) : (
-                      "Add to Cart"
-                    )}
-                  </button>
-                </div>
-                <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
-                  alt={item.item_name}
-                  className="card-img-right lazyload"
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
-                  onLoad={handleImageLoad}
-                  onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="row">
-          {nonHotCoffeeItems.map(item => (
+          {allCoffeeItems.map(item => (
             <div key={item.id} className="col-md-12 mb-4">
               <div className="card h-100 d-flex flex-row align-items-center">
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
