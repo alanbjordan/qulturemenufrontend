@@ -48,8 +48,15 @@ const SaturdaySpecial = ({ goToMainMenu, cartItems, setCartItems }) => {
       const items = await fetchMenuItems();
       console.log("Fetched items:", items); // Log fetched items to the console
       const specialItems = items.filter(item => item.category_id === '6eda43d9-b8af-4e29-88ef-0aaee16c77c8'); // Saturday Special category ID
-      setSpecialItems(specialItems);
-      setTotalImages(specialItems.length);
+
+      const sortedItems = specialItems.sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
+
+      setSpecialItems(sortedItems);
+      setTotalImages(sortedItems.length);
     };
 
     const loadData = async () => {

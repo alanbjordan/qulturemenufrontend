@@ -49,8 +49,16 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       console.log("Fetched items:", items); // Log fetched items to the console
 
       const bakeryItems = items.filter(item => item.category_id === '4fd81f0d-d796-4538-b04d-6fdcd85758ee'); // Bakery category ID
-      setBakeryItems(bakeryItems);
-      setTotalImages(bakeryItems.length);
+      
+      // Sort items from most expensive to least expensive
+      const sortedItems = bakeryItems.sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
+
+      setBakeryItems(sortedItems);
+      setTotalImages(sortedItems.length);
     };
 
     const loadData = async () => {
@@ -74,15 +82,15 @@ const BakeryItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   };
 
   const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => 
-      cartItem.id === item.id && 
+    const existingItem = cartItems.find(cartItem =>
+      cartItem.id === item.id &&
       (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
       JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
     );
     const itemPrice = selectedVariant ? selectedVariant.default_price : item.default_price;
     if (existingItem) {
       setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id && 
+        cartItem.id === item.id &&
         (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
         JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
           ? { ...cartItem, quantity: cartItem.quantity + 1 }

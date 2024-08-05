@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuItems } from '../services/api';
-import breakfastHeader from '../images/breakfastHeader.png'; // Update with the correct image for breakfast
-import placeholderImage from '../images/placeholder.gif'; // A low-resolution placeholder image
+import breakfastHeader from '../images/breakfastHeader.png';
+import placeholderImage from '../images/placeholder.gif';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { css } from '@emotion/react';
-import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
+import ClipLoader from 'react-spinners/ClipLoader';
 import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import DOMPurify from 'dompurify';
@@ -34,23 +34,28 @@ const toTitleCase = (str) => {
 
 const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [breakfastItems, setBreakfastItems] = useState([]);
-  const [loading, setLoading] = useState(true); // State to manage loading
-  const [imagesLoaded, setImagesLoaded] = useState(0); // Track the number of images loaded
-  const [totalImages, setTotalImages] = useState(0); // Track the total number of images
-  const [shakingButtonId, setShakingButtonId] = useState(null); // Track the button to shake
+  const [loading, setLoading] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
+  const [shakingButtonId, setShakingButtonId] = useState(null);
   const [modalShow, setModalShow] = useState(false);
   const [modalContent, setModalContent] = useState({});
-  const [selectedVariant, setSelectedVariant] = useState(null); // State to manage selected variant
-  const [modifiers, setModifiers] = useState([]); // State to manage modifiers
-  const [selectedModifiers, setSelectedModifiers] = useState([]); // State to manage selected modifiers
-  const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
-  const [quantity, setQuantity] = useState(1); // State to manage quantity
-
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [modifiers, setModifiers] = useState([]);
+  const [selectedModifiers, setSelectedModifiers] = useState([]);
+  const [loadingButtonId, setLoadingButtonId] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const loadData = async () => {
       const items = await fetchMenuItems();
-      const breakfastItems = items.filter(item => item.category_id === '754001f2-9338-4933-8d06-39c9718ee391'); // Breakfast category ID
+      const breakfastItems = items
+        .filter(item => item.category_id === '754001f2-9338-4933-8d06-39c9718ee391') // Breakfast category ID
+        .sort((a, b) => {
+          const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+          const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+          return priceB - priceA;
+        });
       setBreakfastItems(breakfastItems);
       setTotalImages(breakfastItems.length);
       setLoading(false); // Set loading to false after data is fetched
@@ -262,7 +267,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <Form.Label>{modifier.name}</Form.Label>
               <div className="d-flex">
                 <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
-                  <option value="">None</option> {/* Add default None option */}
+                  <option value="">None</option>
                   {modifier.modifier_options.map(option => (
                     <option key={option.id} value={option.id}>
                       {option.name} - ฿{option.price}

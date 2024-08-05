@@ -48,8 +48,16 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       const items = await fetchMenuItems();
       console.log("Fetched items:", items); // Log fetched items to the console
       const teaItems = items.filter(item => item.category_id === 'af2cef22-376f-4f51-bc21-15081445cf5e'); // Tea category ID
-      setTeaItems(teaItems);
-      setTotalImages(teaItems.length);
+      
+      // Sort items from most expensive to least expensive
+      const sortedItems = teaItems.sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
+
+      setTeaItems(sortedItems);
+      setTotalImages(sortedItems.length);
     };
 
     const loadData = async () => {

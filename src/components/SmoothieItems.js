@@ -49,8 +49,16 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       console.log("Fetched items:", items); // Log fetched items to the console
 
       const smoothieItems = items.filter(item => item.category_id === '49375346-92f7-402e-9c2c-fefcf298add2'); // Smoothie category ID
-      setSmoothieItems(smoothieItems);
-      setTotalImages(smoothieItems.length);
+      
+      // Sort items from most expensive to least expensive
+      const sortedItems = smoothieItems.sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
+
+      setSmoothieItems(sortedItems);
+      setTotalImages(sortedItems.length);
     };
 
     const loadData = async () => {

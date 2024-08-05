@@ -44,20 +44,18 @@ const BrunchItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
 
   useEffect(() => {
-    const getMenuItems = async () => {
+    const loadData = async () => {
       const items = await fetchMenuItems();
-      console.log("Fetched items:", items); // Log fetched items to the console
-
-      const brunchItems = items.filter(item => item.category_id === 'd4518bfd-2379-4dbe-8ac7-dca82cd87a32'); // Brunch category ID
+      const brunchItems = items
+        .filter(item => item.category_id === 'd4518bfd-2379-4dbe-8ac7-dca82cd87a32') // Brunch category ID
+        .sort((a, b) => {
+          const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+          const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+          return priceB - priceA;
+        });
       setBrunchItems(brunchItems);
       setTotalImages(brunchItems.length);
-    };
-
-    const loadData = async () => {
-      await getMenuItems(); // Fetch data in the background
-      setTimeout(() => {
-        setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 3000); // Wait for 3 seconds
+      setLoading(false); // Set loading to false after data is fetched
     };
 
     loadData();
@@ -110,7 +108,6 @@ const BrunchItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     if (item.modifier_ids && item.modifier_ids.length > 0) {
       try {
         const fetchedModifier = await fetchModifierData(item.modifier_ids[0]); // Fetch the first modifier ID only
-        console.log('Fetched modifier:', fetchedModifier);
         setModifiers([fetchedModifier]);
       } catch (error) {
         console.error('Error fetching modifier:', error);
