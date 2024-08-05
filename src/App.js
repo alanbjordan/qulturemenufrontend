@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-ro
 import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
-import Fab from '@mui/material/Fab';
-import ChatIcon from '@mui/icons-material/Chat';
 import { IconButton } from '@mui/material';
 import Badge from '@mui/material/Badge';
 import menuHeader from './images/menuHeader.png';
@@ -31,7 +29,6 @@ import Login from './components/Login';
 import StaffOrders from './components/StaffOrders';
 import CreatePass from './components/CreatePass';
 import Cart from './components/Cart';
-import ChatModal from './components/ChatModal';
 import StaffDashboard from './components/StaffDashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -53,7 +50,7 @@ function App() {
 
   const [showButton, setShowButton] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
-  const [showCartModal, setShowCartModal] = useState(false);
+  const [setShowCartModal] = useState(false);
   const [showCart, setShowCart] = useState(false);
 
   const handleClose = () => setShowOffcanvas(false);
@@ -197,25 +194,7 @@ function App() {
           }} 
           onClick={() => setShowCartModal(true)}
         >
-          <span 
-            style={{ 
-              color: '#D5AA55', 
-              fontWeight: 'bold', 
-              fontSize: '16px',
-              padding: '8px 12px', 
-              backgroundColor: 'rgba(0, 0, 0, 0.8)', // Adding a semi-transparent background
-              borderRadius: '10px'
-            }}
-          >
-            Chat with Digital Server
-          </span>
-          <Fab color="primary" aria-label="chat" style={{ backgroundColor: '#D5AA55', color: '#000' }}>
-            <ChatIcon />
-          </Fab>
         </div>
-
-        {/* Chat Modal */}
-        <ChatModal show={showCartModal} onHide={() => setShowCartModal(false)} cartItems={cartItems} />
       </div>
     </Router>
   );
