@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuItems } from '../services/api';
-import teaHeader from '../images/teaHeader.png'; // Update with the correct image for tea
-import placeholderImage from '../images/placeholder.gif'; // A low-resolution placeholder image
+import teaHeader from '../images/teaHeader.png';
+import placeholderImage from '../images/placeholder.gif';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { css } from '@emotion/react';
-import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
+import ClipLoader from 'react-spinners/ClipLoader';
 import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import DOMPurify from 'dompurify';
@@ -32,24 +32,22 @@ const toTitleCase = (str) => {
 
 const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [teaItems, setTeaItems] = useState([]);
-  const [loading, setLoading] = useState(true); // State to manage loading
-  const [imagesLoaded, setImagesLoaded] = useState(0); // Track the number of images loaded
-  const [totalImages, setTotalImages] = useState(0); // Track the total number of images
-  const [shakingButtonId, setShakingButtonId] = useState(null); // Track the button to shake
+  const [loading, setLoading] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
+  const [shakingButtonId, setShakingButtonId] = useState(null);
   const [modalShow, setModalShow] = useState(false);
   const [modalContent, setModalContent] = useState({});
-  const [selectedVariant, setSelectedVariant] = useState(null); // State to manage selected variant
-  const [modifiers, setModifiers] = useState([]); // State to manage modifiers
-  const [selectedModifiers, setSelectedModifiers] = useState([]); // State to manage selected modifiers
-  const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [modifiers, setModifiers] = useState([]);
+  const [selectedModifiers, setSelectedModifiers] = useState([]);
+  const [loadingButtonId, setLoadingButtonId] = useState(null);
 
   useEffect(() => {
     const getMenuItems = async () => {
       const items = await fetchMenuItems();
-      console.log("Fetched items:", items); // Log fetched items to the console
-      const teaItems = items.filter(item => item.category_id === 'af2cef22-376f-4f51-bc21-15081445cf5e'); // Tea category ID
-      
-      // Sort items from most expensive to least expensive
+      const teaItems = items.filter(item => item.category_id === 'af2cef22-376f-4f51-bc21-15081445cf5e');
+
       const sortedItems = teaItems.sort((a, b) => {
         const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
         const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
@@ -61,10 +59,10 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     };
 
     const loadData = async () => {
-      await getMenuItems(); // Fetch data in the background
+      await getMenuItems();
       setTimeout(() => {
-        setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 10); // Wait for 3 seconds
+        setLoading(false);
+      }, 10);
     };
 
     loadData();
@@ -99,25 +97,24 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
-    setLoadingButtonId(item.id); // Start spinner
+    setLoadingButtonId(item.id);
     setTimeout(() => {
-      setLoadingButtonId(null); // Stop spinner
-      setShakingButtonId(item.id); // Start shaking
+      setLoadingButtonId(null);
+      setShakingButtonId(item.id);
       setTimeout(() => {
-        setShakingButtonId(null); // Stop shaking
+        setShakingButtonId(null);
         setTimeout(() => {
-          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
-        }, 500); // Delay before reverting to "Add to Cart"
-      }, 500); // Duration of shake animation
-    }, 500); // Duration of spinner before modal opens
+          setShakingButtonId(null);
+        }, 500);
+      }, 500);
+    }, 500);
   };
 
   const handleAddToCartClick = async (item) => {
-    setLoadingButtonId(item.id); // Start spinner
+    setLoadingButtonId(item.id);
     if (item.modifier_ids && item.modifier_ids.length > 0) {
       try {
-        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]); // Fetch the first modifier ID only
-        console.log('Fetched modifier:', fetchedModifier);
+        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]);
         setModifiers([fetchedModifier]);
       } catch (error) {
         console.error('Error fetching modifier:', error);
@@ -126,12 +123,12 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setModifiers([]);
     }
     setModalContent(item);
-    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
-    setSelectedModifiers([]); // Reset selected modifiers
+    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null);
+    setSelectedModifiers([]);
     setTimeout(() => {
       setModalShow(true);
-      setLoadingButtonId(null); // Stop spinner once modal opens
-    }, 500); // Adjust duration as needed
+      setLoadingButtonId(null);
+    }, 500);
   };
 
   const fetchModifierData = async (modifierId) => {
@@ -144,7 +141,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
 
   const handleModalClose = () => {
     setModalShow(false);
-    setLoadingButtonId(null); // Reset loading state if modal is closed without adding
+    setLoadingButtonId(null);
   };
 
   const handleVariantChange = (event) => {
@@ -157,26 +154,21 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     const selectedOptionId = event.target.value;
     const selectedOption = selectedOptionId ? modifiers[modifierIndex].modifier_options.find(option => option.id === selectedOptionId) : null;
 
-    // Update selected option for the given modifier
     setModifiers(modifiers => {
       const newModifiers = [...modifiers];
       newModifiers[modifierIndex].selectedOption = selectedOption;
       return newModifiers;
     });
-  };
-
-  const handleAddModifier = (modifierIndex) => {
-    const modifier = modifiers[modifierIndex];
-    const selectedOption = modifier.selectedOption;
 
     if (selectedOption) {
-      setSelectedModifiers(prevSelectedModifiers => [
-        ...prevSelectedModifiers,
-        {
-          ...modifier,
+      setSelectedModifiers(prevSelectedModifiers => {
+        const newSelectedModifiers = [...prevSelectedModifiers];
+        newSelectedModifiers[modifierIndex] = {
+          ...modifiers[modifierIndex],
           selectedOption,
-        },
-      ]);
+        };
+        return newSelectedModifiers;
+      });
     }
   };
 
@@ -238,7 +230,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   className="card-img-right lazyload"
                   style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
                   onLoad={handleImageLoad}
-                  onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
+                  onError={handleImageLoad}
                 />
               </div>
             </div>
@@ -267,34 +259,19 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
               <Form.Label>Select Add-ons</Form.Label>
-              <div className="d-flex">
-                <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
-                  <option value="">None</option> {/* Add default None option */}
-                  {modifier.modifier_options.map(option => (
-                    <option key={option.id} value={option.id}>
-                      {option.name} - ฿{option.price}
-                    </option>
-                  ))}
-                </Form.Control>
-                <Button variant="secondary" className="ml-2" onClick={() => handleAddModifier(index)} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }}>
-                  Add Selection
-                </Button>
-              </div>
+              <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
+                <option value="">None</option>
+                {modifier.modifier_options.map(option => (
+                  <option key={option.id} value={option.id}>
+                    {option.name} - ฿{option.price}
+                  </option>
+                ))}
+              </Form.Control>
             </Form.Group>
           ))}
-          {selectedModifiers.length > 0 && (
-            <div>
-              <h6>Selected Add-ons:</h6>
-              <ul>
-                {selectedModifiers.map((modifier, index) => (
-                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="dark" onClick={handleModalClose} >
+          <Button variant="dark" onClick={handleModalClose}>
             Close
           </Button>
           <Button variant="secondary" style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }} onClick={handleAddVariantToCart}>
