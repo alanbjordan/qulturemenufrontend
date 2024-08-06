@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,21 +32,21 @@ import Cart from './components/Cart';
 import StaffDashboard from './components/StaffDashboard';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import { useSession } from './contexts/SessionContext'; // Import the useSession hook
 
 function App() {
+  const { sessionData, setSessionData } = useSession();
   const [view, setView] = useState('home');
-  const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem('cartItems');
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
-
+  
+  const cartItems = sessionData.cartItems || [];
+  
   const clearCart = () => {
-    setCartItems([]);
+    setSessionData(prev => ({ ...prev, cartItems: [] }));
   };
 
   useEffect(() => {
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-  }, [cartItems]);
+    localStorage.setItem('sessionData', JSON.stringify(sessionData));
+  }, [sessionData]);
 
   const [showButton, setShowButton] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
@@ -59,6 +59,34 @@ function App() {
   const getTotalQuantity = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
+
+  // Timeout duration (e.g., 15 minutes)
+  const TIMEOUT_DURATION = 15 * 60 * 1000;
+  const timeoutRef = useRef();
+
+  const resetTimeout = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setSessionData({});
+      localStorage.removeItem('sessionData');
+    }, TIMEOUT_DURATION);
+  }, [setSessionData, TIMEOUT_DURATION]);
+
+  useEffect(() => {
+    const handleActivity = () => resetTimeout();
+    window.addEventListener('click', handleActivity);
+    window.addEventListener('keypress', handleActivity);
+
+    resetTimeout();
+
+    return () => {
+      clearTimeout(timeoutRef.current);
+      window.removeEventListener('click', handleActivity);
+      window.removeEventListener('keypress', handleActivity);
+    };
+  }, [resetTimeout]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,23 +107,23 @@ function App() {
   const renderContent = () => {
     switch (view) {
       case 'coffee':
-        return <CoffeeItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <CoffeeItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'tea':
-        return <TeaItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <TeaItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'smoothie':
-        return <SmoothieItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <SmoothieItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'coldPress':
-        return <ColdPressItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <ColdPressItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'breakfast':
-        return <BreakfastItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <BreakfastItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'brunch':
-        return <BrunchItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <BrunchItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'italiansoda':
-        return <ItalianSodaSoftDrinkItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <ItalianSodaSoftDrinkItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'bakery':
-        return <BakeryItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <BakeryItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       case 'saturdaySpecial':
-        return <SaturdaySpecialItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={setCartItems} />;
+        return <SaturdaySpecialItems goToMainMenu={() => setView('home')} cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} />;
       default:
         return (
           <div className="container content">
@@ -179,7 +207,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <BackToTopButton show={showButton} />
-        <Cart cartItems={cartItems} setCartItems={setCartItems} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
+        <Cart cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
 
         {/* Add FAB with text */}
         <div 
