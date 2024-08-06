@@ -8,6 +8,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
 import { getQueryParams } from '../utils/utils'; // Adjust the path as needed
+import Geolocation from './Geolocation'; // Import the Geolocation component
 
 const CartPaper = styled(Paper)(({ theme }) => ({
   position: 'absolute',
@@ -51,6 +52,15 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [cartComment, setCartComment] = useState('');
   const [tableNumber, setTableNumber] = useState('');
+  const [location, setLocation] = useState({ lat: null, lng: null });
+  const [locationError, setLocationError] = useState(null); // eslint-disable-line no-unused-vars
+
+  const BOUNDARY = {
+    latMin: 13.54, // Set your boundary's minimum latitude
+    latMax: 13.86, // Set your boundary's maximum latitude
+    lngMin: 100.50, // Set your boundary's minimum longitude
+    lngMax: 100.70  // Set your boundary's maximum longitude
+  };
 
   useEffect(() => {
     const params = getQueryParams(window.location.search);
@@ -60,12 +70,28 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
     }
   }, []);
 
+  const isWithinBoundary = (location) => {
+    return (
+      location.lat >= BOUNDARY.latMin &&
+      location.lat <= BOUNDARY.latMax &&
+      location.lng >= BOUNDARY.lngMin &&
+      location.lng <= BOUNDARY.lngMax
+    );
+  };
+
   const handleSubmitOrder = async () => {
+    if (!isWithinBoundary(location)) {
+      setOrderStatus('Please visit the restaurant to submit an order. Or disable VPNs & Allow Location');
+      setDialogOpen(true);
+      return;
+    }
+
     setLoading(true);
 
     const order = {
       table_name: tableNumber,
       comment: cartComment,
+      location: location, // Include location data
       line_items: cartItems.map(item => ({
         item_name: item.item_name,
         quantity: item.quantity,
@@ -117,6 +143,7 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
 
   return (
     <>
+      <Geolocation setLocation={setLocation} setLocationError={setLocationError} />
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
