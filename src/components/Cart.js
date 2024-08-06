@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IconButton, Modal, Backdrop, Fade, Paper, Typography, Button, List, ListItem,
   ListItemText, Grid, CircularProgress, Dialog, DialogActions, DialogContent,
@@ -7,6 +7,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
+import { getQueryParams } from '../utils/utils'; // Adjust the path as needed
 
 const CartPaper = styled(Paper)(({ theme }) => ({
   position: 'absolute',
@@ -49,12 +50,21 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [cartComment, setCartComment] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
+
+  useEffect(() => {
+    const params = getQueryParams(window.location.search);
+    const table = params.get('table');
+    if (table) {
+      setTableNumber(table);
+    }
+  }, []);
 
   const handleSubmitOrder = async () => {
     setLoading(true);
 
     const order = {
-      table_name: 'Table 2',
+      table_name: tableNumber,
       comment: cartComment,
       line_items: cartItems.map(item => ({
         item_name: item.item_name,
