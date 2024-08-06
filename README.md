@@ -1,70 +1,131 @@
-# Getting Started with Create React App
+# Digital Menu Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Table of Contents
+- [Introduction](#introduction)
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [Components](#components)
+- [Session Management](#session-management)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Available Scripts
+## Introduction
+The Digital Menu application is a React-based web app designed to provide an interactive menu experience for users. It includes various sections like breakfast, bakery, coffee, and more. Users can browse items, add them to their cart, and enjoy a seamless browsing experience.
 
-In the project directory, you can run:
+## Features
+- Interactive digital menu with various categories
+- Add items to the cart
+- Session management with local storage
+- User inactivity timeout for session control
+- Responsive design with Bootstrap
 
-### `npm start`
+## Installation
+To get started with the Digital Menu application, follow these steps:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/yourusername/digital-menu.git
+   ```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+2. **Navigate to the project directory:**
+   ```sh
+   cd digital-menu
+   ```
 
-### `npm test`
+3. **Install the dependencies:**
+   ```sh
+   npm install
+   ```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+4. **Start the development server:**
+   ```sh
+   npm start
+   ```
 
-### `npm run build`
+## Usage
+Once the development server is running, you can access the application at `http://localhost:3000`. The menu allows you to browse different categories and add items to your cart. The session data is persisted in local storage and includes a timeout mechanism to clear the session after a period of inactivity.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Project Structure
+```
+digital-menu/
+├── public/
+│   ├── index.html
+│   └── ...
+├── src/
+│   ├── components/
+│   │   ├── BakeryItems.js
+│   │   ├── BreakfastItems.js
+│   │   ├── BrunchItems.js
+│   │   ├── Cart.js
+│   │   ├── ColdPressItems.js
+│   │   ├── CoffeeItems.js
+│   │   ├── CreatePass.js
+│   │   ├── DigitalMenu.js
+│   │   ├── ItalianSodaSoftDrinkItems.js
+│   │   ├── Login.js
+│   │   ├── SaturdaySpecialItems.js
+│   │   ├── SmoothieItems.js
+│   │   ├── StaffDashboard.js
+│   │   ├── StaffOrders.js
+│   │   ├── TeaItems.js
+│   │   ├── BackToTopButton.js
+│   │   └── ...
+│   ├── contexts/
+│   │   ├── SessionContext.js
+│   ├── images/
+│   │   ├── bakery.png
+│   │   ├── breakfastPhoto.png
+│   │   ├── brunch.png
+│   │   ├── coffee.png
+│   │   ├── coldpress.png
+│   │   ├── italianSoda.png
+│   │   ├── menuHeader.png
+│   │   ├── saturdaySpecial.png
+│   │   ├── smoothie.png
+│   │   ├── tea.png
+│   ├── App.js
+│   ├── App.css
+│   ├── index.js
+│   ├── index.css
+│   └── ...
+├── package.json
+└── README.md
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Components
+- **BakeryItems.js:** Displays bakery items.
+- **BreakfastItems.js:** Displays breakfast items.
+- **BrunchItems.js:** Displays brunch items.
+- **Cart.js:** Manages cart items and displays the cart.
+- **ColdPressItems.js:** Displays cold press items.
+- **CoffeeItems.js:** Displays coffee items.
+- **CreatePass.js:** Manages the creation of a pass.
+- **DigitalMenu.js:** The main digital menu component.
+- **ItalianSodaSoftDrinkItems.js:** Displays Italian soda and soft drink items.
+- **Login.js:** Manages staff login.
+- **SaturdaySpecialItems.js:** Displays Saturday special items.
+- **SmoothieItems.js:** Displays smoothie items.
+- **StaffDashboard.js:** Staff dashboard component.
+- **StaffOrders.js:** Displays staff orders.
+- **TeaItems.js:** Displays tea items.
+- **BackToTopButton.js:** A button to scroll back to the top.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Session Management
+Session management is handled using React's Context API and local storage. The session data includes cart items and is persisted across page reloads. A timeout mechanism clears the session after 15 minutes of inactivity.
 
-### `npm run eject`
+### Context and Provider
+The `SessionContext` is created to manage session state globally. The `SessionProvider` initializes session state from local storage and updates it whenever the state changes.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### Timeout Mechanism
+A timeout mechanism is implemented to clear the session after a period of inactivity. The timeout is reset on user interactions such as clicks and key presses.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Contributing
+Contributions are welcome! Please create a pull request with a detailed description of your changes.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## License
+This project is licensed under the MIT License.
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+This markdown file should give a comprehensive overview of your Digital Menu application, formatted appropriately for GitHub. Adjust the content as needed to match your specific project details and repository URL.
