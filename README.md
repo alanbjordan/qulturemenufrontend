@@ -62,7 +62,6 @@ digital-menu/
 │   │   ├── ColdPressItems.js
 │   │   ├── CoffeeItems.js
 │   │   ├── CreatePass.js
-│   │   ├── DigitalMenu.js
 │   │   ├── ItalianSodaSoftDrinkItems.js
 │   │   ├── Login.js
 │   │   ├── SaturdaySpecialItems.js
@@ -102,7 +101,6 @@ digital-menu/
 - **ColdPressItems.js:** Displays cold press items.
 - **CoffeeItems.js:** Displays coffee items.
 - **CreatePass.js:** Manages the creation of a pass.
-- **DigitalMenu.js:** The main digital menu component.
 - **ItalianSodaSoftDrinkItems.js:** Displays Italian soda and soft drink items.
 - **Login.js:** Manages staff login.
 - **SaturdaySpecialItems.js:** Displays Saturday special items.
