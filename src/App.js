@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
-import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
+import { Navbar, Container, Button, Offcanvas, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { IconButton } from '@mui/material';
@@ -40,6 +40,10 @@ const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
 const AppContent = ({ tableNumber }) => {
   const { sessionData, setSessionData } = useSession();
   const [view, setView] = useState('home');
+  const [loading, setLoading] = useState(false);
+  const [showButton, setShowButton] = useState(false);
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [showCart, setShowCart] = useState(false);
 
   const cartItems = sessionData.cartItems || [];
 
@@ -50,11 +54,6 @@ const AppContent = ({ tableNumber }) => {
   useEffect(() => {
     localStorage.setItem('sessionData', JSON.stringify(sessionData));
   }, [sessionData]);
-
-  const [showButton, setShowButton] = useState(false);
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
-  const [setShowCartModal] = useState(false);
-  const [showCart, setShowCart] = useState(false);
 
   const handleClose = () => setShowOffcanvas(false);
   const handleShow = () => setShowOffcanvas(true);
@@ -108,6 +107,7 @@ const AppContent = ({ tableNumber }) => {
   }, []);
 
   const callWaiter = async (tableNumber) => {
+    setLoading(true);
     try {
       await axios.post(`${BASE_URL}/api/call-waiter`, {
         message: 'A customer is calling a waiter!',
@@ -116,6 +116,8 @@ const AppContent = ({ tableNumber }) => {
       alert('Waiter has been called.');
     } catch (error) {
       console.error('Error calling waiter:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -174,9 +176,6 @@ const AppContent = ({ tableNumber }) => {
                 <div className="section mb-4" onClick={() => setView('saturdaySpecial')}>
                   <img src={saturdaySpecial} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
-                <div className="text-center mt-4">
-                  <Button variant="warning" onClick={() => callWaiter(tableNumber)}>Call Waiter</Button>
-                </div>
               </div>
             </div>
           </div>
@@ -193,7 +192,9 @@ const AppContent = ({ tableNumber }) => {
             <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
           </a>
           <div className="ms-auto d-flex align-items-center">
-            <Button as={Link} to="/create-pass" variant="light" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>Qulture Rewards</Button>
+            <Button variant="warning" onClick={() => callWaiter(tableNumber)} style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>
+              {loading ? <Spinner animation="border" size="sm" /> : 'Call Waiter'}
+            </Button>
             <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
               <Badge badgeContent={getTotalQuantity()} color="secondary">
                 <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
@@ -225,21 +226,6 @@ const AppContent = ({ tableNumber }) => {
       </Routes>
       <BackToTopButton show={showButton} />
       <Cart cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
-
-      {/* Add FAB with text */}
-      <div 
-        style={{ 
-          position: 'fixed', 
-          bottom: '20px', 
-          right: '20px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: '10px',
-          cursor: 'pointer' // Make the whole container clickable
-        }} 
-        onClick={() => setShowCartModal(true)}
-      >
-      </div>
     </div>
   );
 };
