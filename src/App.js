@@ -218,7 +218,7 @@ const AppContent = ({ tableNumber }) => {
           {tableNumber === 'staff' && (
             <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
           )}
-          <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
+          <Button as={Link} to={'https://lin.ee/hbKtoo0'} variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
         </Offcanvas.Body>
       </Offcanvas>
 
