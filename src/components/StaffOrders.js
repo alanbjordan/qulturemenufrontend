@@ -19,10 +19,6 @@ socket.on('disconnect', () => {
   console.log('Disconnected from the backend');
 });
 
-socket.on('new_order', (data) => {
-  console.log('New order received', data);
-});
-
 const override = css`
   display: block;
   margin: 0 auto;
@@ -39,6 +35,7 @@ const spinnerContainerStyle = {
 
 const StaffOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [callWaiterRequests, setCallWaiterRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -89,9 +86,14 @@ const StaffOrders = () => {
       setOrders((prevOrders) => prevOrders.filter(order => order.order_id !== updatedOrder.order_id));
     });
 
+    socket.on('call_waiter', ({ message, table_name }) => {
+      setCallWaiterRequests((prevRequests) => [...prevRequests, { table_name, message }]);
+    });
+
     return () => {
       socket.off('new_order');
       socket.off('order_status_update');
+      socket.off('call_waiter');
     };
   }, []);
 
@@ -113,6 +115,10 @@ const StaffOrders = () => {
     }
   };
 
+  const handleCallWaiterAttended = (index) => {
+    setCallWaiterRequests((prevRequests) => prevRequests.filter((_, i) => i !== index));
+  };
+
   if (loading) {
     return (
       <div style={spinnerContainerStyle}>
@@ -129,6 +135,24 @@ const StaffOrders = () => {
     <div className="container mt-4" style={{ fontFamily: 'Roboto, sans-serif' }}>
       <h2 className="mb-4" style={{ fontWeight: 700 }}>Orders</h2>
       {success && <Alert variant="success">{success}</Alert>}
+      
+      {callWaiterRequests.map((request, index) => (
+        <Card key={index} className="mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
+          <Card.Header style={{ fontWeight: 500 }}>Call Waiter Request</Card.Header>
+          <Card.Body>
+            <Card.Title style={{ fontWeight: 700 }}>{request.message}</Card.Title>
+            <Card.Text><strong>Table:</strong> {request.table_name}</Card.Text>
+            <Button 
+              variant="dark" 
+              onClick={() => handleCallWaiterAttended(index)} 
+              style={{ marginTop: '15px', fontFamily: 'Roboto, sans-serif' }}
+            >
+              Attended
+            </Button>
+          </Card.Body>
+        </Card>
+      ))}
+
       {orders.map(order => (
         <Card key={order.order_id} className="mb-3" style={{ fontFamily: 'Roboto, sans-serif' }}>
           <Card.Header style={{ fontWeight: 500 }}>Table: {order.table_name}</Card.Header>
