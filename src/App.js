@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from 'react-router-dom';
 import { Navbar, Container, Button, Offcanvas } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
 import { IconButton } from '@mui/material';
 import Badge from '@mui/material/Badge';
+import axios from 'axios';
 import menuHeader from './images/menuHeader.png';
 import breakfast from './images/breakfastPhoto.png';
 import bakery from './images/bakery.png';
@@ -34,12 +35,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { useSession } from './contexts/SessionContext'; // Import the useSession hook
 
-function App() {
+const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
+
+const AppContent = ({ tableNumber }) => {
   const { sessionData, setSessionData } = useSession();
   const [view, setView] = useState('home');
-  
+
   const cartItems = sessionData.cartItems || [];
-  
+
   const clearCart = () => {
     setSessionData(prev => ({ ...prev, cartItems: [] }));
   };
@@ -104,6 +107,18 @@ function App() {
     };
   }, []);
 
+  const callWaiter = async (tableNumber) => {
+    try {
+      await axios.post(`${BASE_URL}/api/call-waiter`, {
+        message: 'A customer is calling a waiter!',
+        table_name: tableNumber
+      });
+      alert('Waiter has been called.');
+    } catch (error) {
+      console.error('Error calling waiter:', error);
+    }
+  };
+
   const renderContent = () => {
     switch (view) {
       case 'coffee':
@@ -159,6 +174,9 @@ function App() {
                 <div className="section mb-4" onClick={() => setView('saturdaySpecial')}>
                   <img src={saturdaySpecial} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
+                <div className="text-center mt-4">
+                  <Button variant="warning" onClick={() => callWaiter(tableNumber)}>Call Waiter</Button>
+                </div>
               </div>
             </div>
           </div>
@@ -167,65 +185,81 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="App bg-black">
-        <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
-          <Container className="d-flex justify-content-between align-items-center">
-            <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
-            <a href="/" onClick={() => window.location.reload()}>
-              <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
-            </a>
-            <div className="ms-auto d-flex align-items-center">
-              <Button as={Link} to="/create-pass" variant="light" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>Qulture Rewards</Button>
-              <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
-                <Badge badgeContent={getTotalQuantity()} color="secondary">
-                  <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
-                </Badge>
-              </IconButton>
-            </div>
-          </Container>
-        </Navbar>
+    <div className="App bg-black">
+      <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
+        <Container className="d-flex justify-content-between align-items-center">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
+          <a href="/" onClick={() => window.location.reload()}>
+            <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
+          </a>
+          <div className="ms-auto d-flex align-items-center">
+            <Button as={Link} to="/create-pass" variant="light" style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>Qulture Rewards</Button>
+            <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
+              <Badge badgeContent={getTotalQuantity()} color="secondary">
+                <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
+              </Badge>
+            </IconButton>
+          </div>
+        </Container>
+      </Navbar>
 
-        <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start" style={{ backgroundColor: '#000000' }}>
-          <Offcanvas.Header>
-            <Offcanvas.Title style={{ color: '#FFFFFF' }}>Qulture Lounge & Cafe</Offcanvas.Title>
-            <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} style={{ filter: 'invert(1)' }}></button>
-          </Offcanvas.Header>
-          <Offcanvas.Body className="d-flex flex-column align-items-start p-4" style={{ backgroundColor: '#FFFFFF' }}>
-            <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={() => window.location.reload()} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
-            <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
-            <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
-          </Offcanvas.Body>
-        </Offcanvas>
+      <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start" style={{ backgroundColor: '#000000' }}>
+        <Offcanvas.Header>
+          <Offcanvas.Title style={{ color: '#FFFFFF' }}>Qulture Lounge & Cafe</Offcanvas.Title>
+          <button type="button" className="btn-close" aria-label="Close" onClick={handleClose} style={{ filter: 'invert(1)' }}></button>
+        </Offcanvas.Header>
+        <Offcanvas.Body className="d-flex flex-column align-items-start p-4" style={{ backgroundColor: '#FFFFFF' }}>
+          <Button as={Link} to="/" variant="dark" className="mb-2 w-100 text-start" onClick={() => window.location.reload()} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Menu</Button>
+          <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
+          <Button variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
+        </Offcanvas.Body>
+      </Offcanvas>
 
-        <Routes>
-          <Route path="/" element={renderContent()} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/staff-dashboard" element={<StaffDashboard />} />
-          <Route path="/staff-orders" element={<StaffOrders />} />
-          <Route path="/create-pass" element={<CreatePass />} />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
-        <BackToTopButton show={showButton} />
-        <Cart cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
+      <Routes>
+        <Route path="/" element={renderContent()} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/staff-dashboard" element={<StaffDashboard />} />
+        <Route path="/staff-orders" element={<StaffOrders />} />
+        <Route path="/create-pass" element={<CreatePass />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+      <BackToTopButton show={showButton} />
+      <Cart cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
 
-        {/* Add FAB with text */}
-        <div 
-          style={{ 
-            position: 'fixed', 
-            bottom: '20px', 
-            right: '20px', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '10px',
-            cursor: 'pointer' // Make the whole container clickable
-          }} 
-          onClick={() => setShowCartModal(true)}
-        >
-        </div>
+      {/* Add FAB with text */}
+      <div 
+        style={{ 
+          position: 'fixed', 
+          bottom: '20px', 
+          right: '20px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '10px',
+          cursor: 'pointer' // Make the whole container clickable
+        }} 
+        onClick={() => setShowCartModal(true)}
+      >
       </div>
+    </div>
+  );
+};
+
+const App = () => {
+  return (
+    <Router>
+      <AppWithRouter />
     </Router>
   );
-}
+};
+
+const AppWithRouter = () => {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const tableNumber = params.get('table') || 'Unknown Table';
+
+  return (
+    <AppContent tableNumber={tableNumber} />
+  );
+};
 
 export default App;
