@@ -41,6 +41,7 @@ const AppContent = ({ tableNumber }) => {
   const { sessionData, setSessionData } = useSession();
   const [view, setView] = useState('home');
   const [loading, setLoading] = useState(false);
+  const [buttonText, setButtonText] = useState('Call Waiter');
   const [showButton, setShowButton] = useState(false);
   const [showOffcanvas, setShowOffcanvas] = useState(false);
   const [showCart, setShowCart] = useState(false);
@@ -108,16 +109,19 @@ const AppContent = ({ tableNumber }) => {
 
   const callWaiter = async (tableNumber) => {
     setLoading(true);
+    setButtonText('Waiter Called');
     try {
       await axios.post(`${BASE_URL}/api/call-waiter`, {
         message: 'A customer is calling a waiter!',
         table_name: tableNumber
       });
-      alert('Waiter has been called.');
     } catch (error) {
       console.error('Error calling waiter:', error);
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setButtonText('Call Waiter');
+      }, 5000); // Revert the button text back after 5 seconds
     }
   };
 
@@ -193,7 +197,7 @@ const AppContent = ({ tableNumber }) => {
           </a>
           <div className="ms-auto d-flex align-items-center">
             <Button variant="warning" onClick={() => callWaiter(tableNumber)} style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>
-              {loading ? <Spinner animation="border" size="sm" /> : 'Call Waiter'}
+              {loading ? <Spinner animation="border" size="sm" /> : buttonText}
             </Button>
             <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
               <Badge badgeContent={getTotalQuantity()} color="secondary">
