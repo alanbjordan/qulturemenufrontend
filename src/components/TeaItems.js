@@ -9,6 +9,8 @@ import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import DOMPurify from 'dompurify';
 import { Modal, Button, Form } from 'react-bootstrap';
+import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
 
 const override = css`
   display: block;
@@ -42,6 +44,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [modifiers, setModifiers] = useState([]);
   const [selectedModifiers, setSelectedModifiers] = useState([]);
   const [loadingButtonId, setLoadingButtonId] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const getMenuItems = async () => {
@@ -90,11 +93,11 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         cartItem.id === item.id &&
         (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
         JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          ? { ...cartItem, quantity: cartItem.quantity + quantity }
           : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers, price: itemPrice }]);
+      setCartItems([...cartItems, { ...item, quantity, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
     setLoadingButtonId(item.id);
@@ -125,6 +128,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     setModalContent(item);
     setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null);
     setSelectedModifiers([]);
+    setQuantity(1);
     setTimeout(() => {
       setModalShow(true);
       setLoadingButtonId(null);
@@ -159,17 +163,29 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       newModifiers[modifierIndex].selectedOption = selectedOption;
       return newModifiers;
     });
+  };
+
+  const handleAddModifier = (modifierIndex) => {
+    const modifier = modifiers[modifierIndex];
+    const selectedOption = modifier.selectedOption;
 
     if (selectedOption) {
-      setSelectedModifiers(prevSelectedModifiers => {
-        const newSelectedModifiers = [...prevSelectedModifiers];
-        newSelectedModifiers[modifierIndex] = {
-          ...modifiers[modifierIndex],
+      setSelectedModifiers(prevSelectedModifiers => [
+        ...prevSelectedModifiers,
+        {
+          ...modifier,
           selectedOption,
-        };
-        return newSelectedModifiers;
-      });
+        },
+      ]);
     }
+  };
+
+  const handleIncrementQuantity = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const handleDecrementQuantity = () => {
+    setQuantity(prevQuantity => (prevQuantity > 1 ? prevQuantity - 1 : 1));
   };
 
   const handleAddVariantToCart = () => {
@@ -243,6 +259,10 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           <Modal.Title>{modalContent.item_name}</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ color: 'black' }}>
+          <h5>{modalContent.item_name}</h5>
+          {selectedVariant && (
+            <h6>Price: ฿{selectedVariant.default_price}</h6>
+          )}
           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></div>
           {modalContent.variants && modalContent.variants.length > 1 && (
             <Form.Group controlId="variantSelect">
@@ -259,16 +279,48 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
               <Form.Label>Select Add-ons</Form.Label>
-              <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
-                <option value="">None</option>
-                {modifier.modifier_options.map(option => (
-                  <option key={option.id} value={option.id}>
-                    {option.name} - ฿{option.price}
-                  </option>
-                ))}
-              </Form.Control>
+              <div className="d-flex">
+                <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
+                  <option value="">None</option>
+                  {modifier.modifier_options.map(option => (
+                    <option key={option.id} value={option.id}>
+                      {option.name} - ฿{option.price}
+                    </option>
+                  ))}
+                </Form.Control>
+                <Button variant="secondary" className="ml-2" onClick={() => handleAddModifier(index)} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }}>
+                  Add Selection
+                </Button>
+              </div>
             </Form.Group>
           ))}
+          {selectedModifiers.length > 0 && (
+            <div>
+              <h6>Selected Add-ons:</h6>
+              <ul>
+                {selectedModifiers.map((modifier, index) => (
+                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <Form.Group controlId="quantitySelect">
+            <Form.Label>Quantity</Form.Label>
+            <div className="d-flex align-items-center">
+              <Button variant="secondary" onClick={handleDecrementQuantity}>
+                <RemoveIcon />
+              </Button>
+              <Form.Control 
+                type="text" 
+                value={quantity} 
+                readOnly
+                style={{ width: '60px', textAlign: 'center', margin: '0 10px' }} 
+              />
+              <Button variant="secondary" onClick={handleIncrementQuantity}>
+                <AddIcon />
+              </Button>
+            </div>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="dark" onClick={handleModalClose}>

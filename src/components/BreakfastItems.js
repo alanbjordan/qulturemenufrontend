@@ -102,7 +102,6 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       }, 500); // Duration of shake animation
     }, 500); // Duration of spinner before modal opens
   };
-  
 
   const handleAddToCartClick = async (item) => {
     setLoadingButtonId(item.id); // Start spinner
@@ -123,7 +122,6 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     setModalShow(true);
     setLoadingButtonId(null); // Stop spinner once modal opens
   };
-  
 
   const fetchModifierData = async (modifierId) => {
     const response = await fetch(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/modifiers?modifier_id=${modifierId}`);
@@ -181,7 +179,14 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       prevSelectedModifiers.filter((_, i) => i !== index)
     );
   };
-  
+
+  const handleIncrementQuantity = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const handleDecrementQuantity = () => {
+    setQuantity(prevQuantity => (prevQuantity > 1 ? prevQuantity - 1 : 1));
+  };
 
   if (loading) {
     return (
@@ -249,6 +254,10 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           <Modal.Title>{modalContent.item_name}</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ color: 'black' }}>
+          <h5>{modalContent.item_name}</h5>
+          {selectedVariant && (
+            <h6>Price: ฿{selectedVariant.default_price}</h6>
+          )}
           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></div>
           {modalContent.variants && modalContent.variants.length > 1 && (
             <Form.Group controlId="variantSelect">
@@ -299,7 +308,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           <Form.Group controlId="quantitySelect">
             <Form.Label>Quantity</Form.Label>
             <div className="d-flex align-items-center">
-              <Button variant="secondary" onClick={() => setQuantity(quantity > 1 ? quantity - 1 : 1)}>
+              <Button variant="secondary" onClick={handleDecrementQuantity}>
                 <RemoveIcon />
               </Button>
               <Form.Control 
@@ -308,7 +317,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                 readOnly
                 style={{ width: '60px', textAlign: 'center', margin: '0 10px' }} 
               />
-              <Button variant="secondary" onClick={() => setQuantity(quantity + 1)}>
+              <Button variant="secondary" onClick={handleIncrementQuantity}>
                 <AddIcon />
               </Button>
             </div>

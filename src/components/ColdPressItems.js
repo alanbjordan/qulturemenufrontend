@@ -9,6 +9,8 @@ import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
 import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import { Modal, Button, Form } from 'react-bootstrap';
+import RemoveIcon from '@mui/icons-material/Remove';
+import AddIcon from '@mui/icons-material/Add';
 
 const override = css`
   display: block;
@@ -42,6 +44,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [modifiers, setModifiers] = useState([]); // State to manage modifiers
   const [selectedModifiers, setSelectedModifiers] = useState([]); // State to manage selected modifiers
   const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
+  const [quantity, setQuantity] = useState(1); // State to manage quantity
 
   useEffect(() => {
     const getMenuItems = async () => {
@@ -92,11 +95,11 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         cartItem.id === item.id &&
         (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
         JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          ? { ...cartItem, quantity: cartItem.quantity + quantity }
           : cartItem
       ));
     } else {
-      setCartItems([...cartItems, { ...item, quantity: 1, selectedVariant, selectedModifiers, price: itemPrice }]);
+      setCartItems([...cartItems, { ...item, quantity, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
     setLoadingButtonId(item.id); // Start spinner
@@ -128,6 +131,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     setModalContent(item);
     setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
     setSelectedModifiers([]); // Reset selected modifiers
+    setQuantity(1); // Reset quantity to 1
     setTimeout(() => {
       setModalShow(true);
       setLoadingButtonId(null); // Stop spinner once modal opens
@@ -178,6 +182,14 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         },
       ]);
     }
+  };
+
+  const handleIncrementQuantity = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const handleDecrementQuantity = () => {
+    setQuantity(prevQuantity => (prevQuantity > 1 ? prevQuantity - 1 : 1));
   };
 
   const handleAddVariantToCart = () => {
@@ -251,6 +263,10 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           <Modal.Title>{modalContent.item_name}</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ color: 'black' }}>
+          <h5>{modalContent.item_name}</h5>
+          {selectedVariant && (
+            <h6>Price: ฿{selectedVariant.default_price}</h6>
+          )}
           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></div>
           {modalContent.variants && modalContent.variants.length > 1 && (
             <Form.Group controlId="variantSelect">
@@ -266,10 +282,10 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           )}
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
-              <Form.Label>Select Add-ons</Form.Label>
+              <Form.Label>{modifier.name}</Form.Label>
               <div className="d-flex">
                 <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
-                  <option value="">None</option> {/* Add default None option */}
+                  <option value="">None</option>
                   {modifier.modifier_options.map(option => (
                     <option key={option.id} value={option.id}>
                       {option.name} - ฿{option.price}
@@ -292,9 +308,26 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               </ul>
             </div>
           )}
+          <Form.Group controlId="quantitySelect">
+            <Form.Label>Quantity</Form.Label>
+            <div className="d-flex align-items-center">
+              <Button variant="secondary" onClick={handleDecrementQuantity}>
+                <RemoveIcon />
+              </Button>
+              <Form.Control 
+                type="text" 
+                value={quantity} 
+                readOnly
+                style={{ width: '60px', textAlign: 'center', margin: '0 10px' }} 
+              />
+              <Button variant="secondary" onClick={handleIncrementQuantity}>
+                <AddIcon />
+              </Button>
+            </div>
+          </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="dark" onClick={handleModalClose} >
+          <Button variant="dark" onClick={handleModalClose}>
             Close
           </Button>
           <Button variant="secondary" style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }} onClick={handleAddVariantToCart}>

@@ -90,7 +90,7 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
 
     const order = {
       table_name: tableNumber,
-      comment: cartComment,
+      comment: cartComment || 'No comment',
       location: location, // Include location data
       line_items: cartItems.map(item => ({
         item_name: item.item_name,
