@@ -42,7 +42,7 @@ const QRCodeDisplay = () => {
       <h1 style={{
         fontSize: '2rem',
         marginBottom: '2rem',
-        color: '#D5AA55', // Gold color for the title
+        color: '#D5AA55', // Gold color for the title2
       }}>
         My Qulture Rewards
       </h1>
