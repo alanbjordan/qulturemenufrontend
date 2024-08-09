@@ -31,6 +31,7 @@ import StaffOrders from './components/StaffOrders';
 import CreatePass from './components/CreatePass';
 import Cart from './components/Cart';
 import StaffDashboard from './components/StaffDashboard';
+import QRCodeDisplay from './components/QRCodeDisplay'; // Import the QRCodeDisplay component
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { useSession } from './contexts/SessionContext'; // Import the useSession hook
@@ -218,6 +219,7 @@ const AppContent = ({ tableNumber }) => {
           {tableNumber === 'staff' && (
             <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
           )}
+          <Button as={Link} to="https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Login with LINE</Button>
           <Button as={Link} to={'https://lin.ee/hbKtoo0'} variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
         </Offcanvas.Body>
       </Offcanvas>
@@ -225,11 +227,13 @@ const AppContent = ({ tableNumber }) => {
       <Routes>
         <Route path="/" element={renderContent()} />
         <Route path="/login" element={<Login />} />
+        <Route path="/line-login" element={<QRCodeDisplay />} />
         <Route path="/staff-dashboard" element={<StaffDashboard />} />
         <Route path="/staff-orders" element={<StaffOrders />} />
         <Route path="/create-pass" element={<CreatePass />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
       <BackToTopButton show={showButton} />
       <Cart cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
     </div>
