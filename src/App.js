@@ -31,10 +31,10 @@ import StaffOrders from './components/StaffOrders';
 import CreatePass from './components/CreatePass';
 import Cart from './components/Cart';
 import StaffDashboard from './components/StaffDashboard';
-import QRCodeDisplay from './components/QRCodeDisplay'; // Import the QRCodeDisplay component
+import QRCodeDisplay from './components/QRCodeDisplay';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { useSession } from './contexts/SessionContext'; // Import the useSession hook
+import { useSession } from './contexts/SessionContext';
 
 const BASE_URL = 'https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/';
 
@@ -64,7 +64,6 @@ const AppContent = ({ tableNumber }) => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // Timeout duration (e.g., 15 minutes)
   const TIMEOUT_DURATION = 15 * 60 * 1000;
   const timeoutRef = useRef();
 
@@ -122,7 +121,7 @@ const AppContent = ({ tableNumber }) => {
       setLoading(false);
       setTimeout(() => {
         setButtonText('Call Waiter');
-      }, 5000); // Revert the button text back after 5 seconds
+      }, 5000);
     }
   };
 
@@ -153,7 +152,7 @@ const AppContent = ({ tableNumber }) => {
               <img src={menuHeader} alt='Qulture' className='img-fluid mb-3' />
             </header>
             <div className="row justify-content-center">
-              <div className="col-10">
+              <div className="col-10 col-md-8 col-lg-6">
                 <div className="section mb-4" onClick={() => setView('breakfast')}>
                   <img src={breakfast} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
@@ -219,7 +218,7 @@ const AppContent = ({ tableNumber }) => {
           {tableNumber === 'staff' && (
             <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
           )}
-          <Button as={Link} to="https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Login with LINE</Button>
+          <Button as={Link} to="https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>My Qulture Rewards</Button>
           <Button as={Link} to={'https://lin.ee/hbKtoo0'} variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
         </Offcanvas.Body>
       </Offcanvas>
@@ -227,7 +226,7 @@ const AppContent = ({ tableNumber }) => {
       <Routes>
         <Route path="/" element={renderContent()} />
         <Route path="/login" element={<Login />} />
-        <Route path="/line-login" element={<QRCodeDisplay />} />   
+        <Route path="/line-login" element={<QRCodeDisplay />} />
         <Route path="/staff-dashboard" element={<StaffDashboard />} />
         <Route path="/staff-orders" element={<StaffOrders />} />
         <Route path="/create-pass" element={<CreatePass />} />

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuItems } from '../services/api';
-import smoothieHeader from '../images/smoothieHeader.png'; // Update with the correct image for smoothies
-import placeholderImage from '../images/placeholder.gif'; // A low-resolution placeholder image
+import smoothieHeader from '../images/smoothieHeader.png';
+import placeholderImage from '../images/placeholder.gif';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { css } from '@emotion/react';
-import ClipLoader from 'react-spinners/ClipLoader'; // Import ClipLoader
+import ClipLoader from 'react-spinners/ClipLoader';
 import 'lazysizes';
 import 'lazysizes/plugins/attrchange/ls.attrchange';
 import DOMPurify from 'dompurify';
@@ -34,26 +34,23 @@ const toTitleCase = (str) => {
 
 const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [smoothieItems, setSmoothieItems] = useState([]);
-  const [loading, setLoading] = useState(true); // State to manage loading
-  const [imagesLoaded, setImagesLoaded] = useState(0); // Track the number of images loaded
-  const [totalImages, setTotalImages] = useState(0); // Track the total number of images
-  const [shakingButtonId, setShakingButtonId] = useState(null); // Track the button to shake
+  const [loading, setLoading] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState(0);
+  const [totalImages, setTotalImages] = useState(0);
+  const [shakingButtonId, setShakingButtonId] = useState(null);
   const [modalShow, setModalShow] = useState(false);
   const [modalContent, setModalContent] = useState({});
-  const [selectedVariant, setSelectedVariant] = useState(null); // State to manage selected variant
-  const [modifiers, setModifiers] = useState([]); // State to manage modifiers
-  const [selectedModifiers, setSelectedModifiers] = useState([]); // State to manage selected modifiers
-  const [loadingButtonId, setLoadingButtonId] = useState(null); // Track the button being loaded
-  const [quantity, setQuantity] = useState(1); // State to manage quantity
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [modifiers, setModifiers] = useState([]);
+  const [selectedModifiers, setSelectedModifiers] = useState([]);
+  const [loadingButtonId, setLoadingButtonId] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const getMenuItems = async () => {
       const items = await fetchMenuItems();
-      console.log("Fetched items:", items); // Log fetched items to the console
-
-      const smoothieItems = items.filter(item => item.category_id === '49375346-92f7-402e-9c2c-fefcf298add2'); // Smoothie category ID
+      const smoothieItems = items.filter(item => item.category_id === '49375346-92f7-402e-9c2c-fefcf298add2');
       
-      // Sort items from most expensive to least expensive
       const sortedItems = smoothieItems.sort((a, b) => {
         const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
         const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
@@ -65,10 +62,10 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     };
 
     const loadData = async () => {
-      await getMenuItems(); // Fetch data in the background
+      await getMenuItems();
       setTimeout(() => {
-        setLoading(false); // Spinner will spin for at least 3 seconds
-      }, 10); // Wait for 3 seconds
+        setLoading(false);
+      }, 10);
     };
 
     loadData();
@@ -103,25 +100,21 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setCartItems([...cartItems, { ...item, quantity, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
-    setLoadingButtonId(item.id); // Start spinner
+    setLoadingButtonId(item.id);
     setTimeout(() => {
-      setLoadingButtonId(null); // Stop spinner
-      setShakingButtonId(item.id); // Start shaking
+      setLoadingButtonId(null);
+      setShakingButtonId(item.id);
       setTimeout(() => {
-        setShakingButtonId(null); // Stop shaking
-        setTimeout(() => {
-          setShakingButtonId(null); // Ensure the button resets to "Add to Cart"
-        }, 500); // Delay before reverting to "Add to Cart"
-      }, 500); // Duration of shake animation
-    }, 500); // Duration of spinner before modal opens
+        setShakingButtonId(null);
+      }, 500);
+    }, 500);
   };
 
   const handleAddToCartClick = async (item) => {
-    setLoadingButtonId(item.id); // Start spinner
+    setLoadingButtonId(item.id);
     if (item.modifier_ids && item.modifier_ids.length > 0) {
       try {
-        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]); // Fetch the first modifier ID only
-        console.log('Fetched modifier:', fetchedModifier);
+        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]);
         setModifiers([fetchedModifier]);
       } catch (error) {
         console.error('Error fetching modifier:', error);
@@ -130,13 +123,13 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setModifiers([]);
     }
     setModalContent(item);
-    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
-    setSelectedModifiers([]); // Reset selected modifiers
-    setQuantity(1); // Reset quantity to 1
+    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null);
+    setSelectedModifiers([]);
+    setQuantity(1);
     setTimeout(() => {
       setModalShow(true);
-      setLoadingButtonId(null); // Stop spinner once modal opens
-    }, 500); // Adjust duration as needed
+      setLoadingButtonId(null);
+    }, 500);
   };
 
   const fetchModifierData = async (modifierId) => {
@@ -149,7 +142,7 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
 
   const handleModalClose = () => {
     setModalShow(false);
-    setLoadingButtonId(null); // Reset loading state if modal is closed without adding
+    setLoadingButtonId(null);
   };
 
   const handleVariantChange = (event) => {
@@ -162,7 +155,6 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     const selectedOptionId = event.target.value;
     const selectedOption = selectedOptionId ? modifiers[modifierIndex].modifier_options.find(option => option.id === selectedOptionId) : null;
 
-    // Update selected option for the given modifier
     setModifiers(modifiers => {
       const newModifiers = [...modifiers];
       newModifiers[modifierIndex].selectedOption = selectedOption;
@@ -217,16 +209,25 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           {smoothieItems.map(item => (
             <div key={item.id} className="col-md-12 mb-4">
               <div className="card h-100 d-flex flex-row align-items-center">
+                <img
+                  src={placeholderImage}
+                  data-src={item.image_url}
+                  alt={item.item_name}
+                  className="card-img-right lazyload"
+                  style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
+                  onLoad={handleImageLoad}
+                  onError={handleImageLoad}
+                />
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
                   <div>
-                    <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
+                    <h6 className="card-title" style={{ fontSize: '1rem' }}>{toTitleCase(item.item_name)}</h6>
                     {item.variants && item.variants.length > 0 ? (
-                      <h6 className="card-text">฿{item.variants[0].default_price}</h6>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.variants[0].default_price}</p>
                     ) : (
-                      <h6 className="card-text">฿{item.default_price}</h6>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.default_price}</p>
                     )}
                     {item.description && (
-                      <Button variant="link" onClick={() => handleAddToCartClick(item)}>
+                      <Button variant="link" onClick={() => handleAddToCartClick(item)} style={{ fontSize: '0.8rem' }}>
                         View Description
                       </Button>
                     )}
@@ -234,6 +235,7 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <button
                     className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
                     onClick={() => handleAddToCartClick(item)}
+                    style={{ fontSize: '0.9rem' }}
                   >
                     {loadingButtonId === item.id ? (
                       <ClipLoader color={"#ffffff"} loading={true} size={15} />
@@ -244,15 +246,6 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                     )}
                   </button>
                 </div>
-                <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
-                  alt={item.item_name}
-                  className="card-img-right lazyload"
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
-                  onLoad={handleImageLoad}
-                  onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
-                />
               </div>
             </div>
           ))}
@@ -283,10 +276,10 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           )}
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
-              <Form.Label>Select Add-ons</Form.Label>
+              <Form.Label>{modifier.name}</Form.Label>
               <div className="d-flex">
                 <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
-                  <option value="">None</option> {/* Add default None option */}
+                  <option value="">None</option>
                   {modifier.modifier_options.map(option => (
                     <option key={option.id} value={option.id}>
                       {option.name} - ฿{option.price}
@@ -328,7 +321,7 @@ const SmoothieItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="dark" onClick={handleModalClose} >
+          <Button variant="dark" onClick={handleModalClose}>
             Close
           </Button>
           <Button variant="secondary" style={{ backgroundColor: '#D5AA55', color: '#FFFFFF' }} onClick={handleAddVariantToCart}>
