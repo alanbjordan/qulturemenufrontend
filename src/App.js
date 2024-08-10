@@ -227,8 +227,7 @@ const AppContent = ({ tableNumber }) => {
       <Routes>
         <Route path="/" element={renderContent()} />
         <Route path="/login" element={<Login />} />
-        <Route path="/line-login2" element={<QRCodeDisplay />} />
-        <Route path="/line-login" element={<Login />} />       
+        <Route path="/line-login" element={<QRCodeDisplay />} />   
         <Route path="/staff-dashboard" element={<StaffDashboard />} />
         <Route path="/staff-orders" element={<StaffOrders />} />
         <Route path="/create-pass" element={<CreatePass />} />
