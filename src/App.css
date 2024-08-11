@@ -184,6 +184,8 @@ ul, li {
 }
 
 .main {
+  max-width: 800px; /* Constrain the width of the main content area */
+  margin: 20px auto; /* Center the content area and add some top margin */
   margin-top: 56px; /* Adjust based on the height of your navbar */
 }
 
@@ -334,3 +336,4 @@ ul, li {
   text-align: center;
   margin-bottom: 20px;
 }
+

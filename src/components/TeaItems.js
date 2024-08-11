@@ -106,9 +106,6 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setShakingButtonId(item.id);
       setTimeout(() => {
         setShakingButtonId(null);
-        setTimeout(() => {
-          setShakingButtonId(null);
-        }, 500);
       }, 500);
     }, 500);
   };
@@ -212,16 +209,25 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           {teaItems.map(item => (
             <div key={item.id} className="col-md-12 mb-4">
               <div className="card h-100 d-flex flex-row align-items-center">
+                <img
+                  src={placeholderImage}
+                  data-src={item.image_url}
+                  alt={item.item_name}
+                  className="card-img-right lazyload"
+                  style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
+                  onLoad={handleImageLoad}
+                  onError={handleImageLoad}
+                />
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
                   <div>
-                    <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
+                    <h6 className="card-title" style={{ fontSize: '1rem' }}>{toTitleCase(item.item_name)}</h6>
                     {item.variants && item.variants.length > 0 ? (
-                      <h6 className="card-text">฿{item.variants[0].default_price}</h6>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.variants[0].default_price}</p>
                     ) : (
-                      <h6 className="card-text">฿{item.default_price}</h6>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.default_price}</p>
                     )}
                     {item.description && (
-                      <Button variant="link" onClick={() => handleAddToCartClick(item)}>
+                      <Button variant="link" onClick={() => handleAddToCartClick(item)} style={{ fontSize: '0.8rem' }}>
                         View Description
                       </Button>
                     )}
@@ -229,6 +235,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <button
                     className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
                     onClick={() => handleAddToCartClick(item)}
+                    style={{ fontSize: '0.9rem' }}
                   >
                     {loadingButtonId === item.id ? (
                       <ClipLoader color={"#ffffff"} loading={true} size={15} />
@@ -239,15 +246,6 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                     )}
                   </button>
                 </div>
-                <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
-                  alt={item.item_name}
-                  className="card-img-right lazyload"
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
-                  onLoad={handleImageLoad}
-                  onError={handleImageLoad}
-                />
               </div>
             </div>
           ))}
@@ -278,7 +276,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           )}
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
-              <Form.Label>Select Add-ons</Form.Label>
+              <Form.Label>{modifier.name}</Form.Label>
               <div className="d-flex">
                 <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
                   <option value="">None</option>

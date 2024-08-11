@@ -47,18 +47,27 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    const loadData = async () => {
+    const getMenuItems = async () => {
       const items = await fetchMenuItems();
-      const breakfastItems = items
-        .filter(item => item.category_id === '754001f2-9338-4933-8d06-39c9718ee391') // Breakfast category ID
-        .sort((a, b) => {
-          const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
-          const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
-          return priceB - priceA;
-        });
-      setBreakfastItems(breakfastItems);
-      setTotalImages(breakfastItems.length);
-      setLoading(false); // Set loading to false after data is fetched
+      console.log("Fetched items:", items);
+
+      const breakfastItems = items.filter(item => item.category_id === '754001f2-9338-4933-8d06-39c9718ee391'); // Breakfast category ID
+      
+      const sortedItems = breakfastItems.sort((a, b) => {
+        const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
+        const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
+        return priceB - priceA;
+      });
+
+      setBreakfastItems(sortedItems);
+      setTotalImages(sortedItems.length);
+    };
+
+    const loadData = async () => {
+      await getMenuItems();
+      setTimeout(() => {
+        setLoading(false);
+      }, 10);
     };
 
     loadData();
@@ -75,15 +84,15 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   };
 
   const addToCart = (item) => {
-    const existingItem = cartItems.find(cartItem => 
-      cartItem.id === item.id && 
+    const existingItem = cartItems.find(cartItem =>
+      cartItem.id === item.id &&
       (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
       JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
     );
     const itemPrice = selectedVariant ? selectedVariant.default_price : item.default_price;
     if (existingItem) {
       setCartItems(cartItems.map(cartItem =>
-        cartItem.id === item.id && 
+        cartItem.id === item.id &&
         (!cartItem.selectedVariant || cartItem.selectedVariant.variant_id === (selectedVariant ? selectedVariant.variant_id : null)) &&
         JSON.stringify(cartItem.selectedModifiers) === JSON.stringify(selectedModifiers)
           ? { ...cartItem, quantity: cartItem.quantity + quantity }
@@ -93,34 +102,40 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       setCartItems([...cartItems, { ...item, quantity, selectedVariant, selectedModifiers, price: itemPrice }]);
     }
     setModalShow(false);
-    setLoadingButtonId(item.id); // Start spinner
+    setLoadingButtonId(item.id);
     setTimeout(() => {
-      setLoadingButtonId(null); // Stop spinner
-      setShakingButtonId(item.id); // Start shaking
+      setLoadingButtonId(null);
+      setShakingButtonId(item.id);
       setTimeout(() => {
-        setShakingButtonId(null); // Stop shaking
-      }, 500); // Duration of shake animation
-    }, 500); // Duration of spinner before modal opens
+        setShakingButtonId(null);
+        setTimeout(() => {
+          setShakingButtonId(null);
+        }, 500);
+      }, 500);
+    }, 500);
   };
 
   const handleAddToCartClick = async (item) => {
-    setLoadingButtonId(item.id); // Start spinner
+    setLoadingButtonId(item.id);
     if (item.modifier_ids && item.modifier_ids.length > 0) {
       try {
-        const fetchedModifiers = await Promise.all(item.modifier_ids.map(fetchModifierData));
-        setModifiers(fetchedModifiers);
+        const fetchedModifier = await fetchModifierData(item.modifier_ids[0]);
+        console.log('Fetched modifier:', fetchedModifier);
+        setModifiers([fetchedModifier]);
       } catch (error) {
-        console.error('Error fetching modifiers:', error);
+        console.error('Error fetching modifier:', error);
       }
     } else {
       setModifiers([]);
     }
     setModalContent(item);
-    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null); // Set default variant selection if it exists
-    setSelectedModifiers([]); // Reset selected modifiers
-    setQuantity(1); // Reset quantity
-    setModalShow(true);
-    setLoadingButtonId(null); // Stop spinner once modal opens
+    setSelectedVariant(item.variants && item.variants.length > 0 ? item.variants[0] : null);
+    setSelectedModifiers([]);
+    setQuantity(1);
+    setTimeout(() => {
+      setModalShow(true);
+      setLoadingButtonId(null);
+    }, 500);
   };
 
   const fetchModifierData = async (modifierId) => {
@@ -133,7 +148,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
 
   const handleModalClose = () => {
     setModalShow(false);
-    setLoadingButtonId(null); // Reset loading state if modal is closed without adding
+    setLoadingButtonId(null);
   };
 
   const handleVariantChange = (event) => {
@@ -146,7 +161,6 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     const selectedOptionId = event.target.value;
     const selectedOption = selectedOptionId ? modifiers[modifierIndex].modifier_options.find(option => option.id === selectedOptionId) : null;
 
-    // Update selected option for the given modifier
     setModifiers(modifiers => {
       const newModifiers = [...modifiers];
       newModifiers[modifierIndex].selectedOption = selectedOption;
@@ -172,12 +186,6 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
   const handleAddVariantToCart = () => {
     const itemWithVariant = { ...modalContent, selectedVariant, selectedModifiers };
     addToCart(itemWithVariant);
-  };
-
-  const handleRemoveModifier = (index) => {
-    setSelectedModifiers(prevSelectedModifiers => 
-      prevSelectedModifiers.filter((_, i) => i !== index)
-    );
   };
 
   const handleIncrementQuantity = () => {
@@ -207,16 +215,25 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           {breakfastItems.map(item => (
             <div key={item.id} className="col-md-12 mb-4">
               <div className="card h-100 d-flex flex-row align-items-center">
+                <img
+                  src={placeholderImage}
+                  data-src={item.image_url}
+                  alt={item.item_name}
+                  className="card-img-right lazyload"
+                  style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
+                  onLoad={handleImageLoad}
+                  onError={handleImageLoad}
+                />
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
                   <div>
-                    <h5 className="card-title">{toTitleCase(item.item_name)}</h5>
+                    <h6 className="card-title" style={{ fontSize: '1rem' }}>{toTitleCase(item.item_name)}</h6>
                     {item.variants && item.variants.length > 0 ? (
-                      <h6 className="card-text">฿{item.variants[0].default_price}</h6>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.variants[0].default_price}</p>
                     ) : (
-                      <h6 className="card-text">฿{item.default_price}</h6>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.default_price}</p>
                     )}
                     {item.description && (
-                      <Button variant="link" onClick={() => handleAddToCartClick(item)}>
+                      <Button variant="link" onClick={() => handleAddToCartClick(item)} style={{ fontSize: '0.8rem' }}>
                         View Description
                       </Button>
                     )}
@@ -224,6 +241,7 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <button
                     className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
                     onClick={() => handleAddToCartClick(item)}
+                    style={{ fontSize: '0.9rem' }}
                   >
                     {loadingButtonId === item.id ? (
                       <ClipLoader color={"#ffffff"} loading={true} size={15} />
@@ -234,15 +252,6 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                     )}
                   </button>
                 </div>
-                <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
-                  alt={item.item_name}
-                  className="card-img-right lazyload"
-                  style={{ width: '100px', height: '100px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
-                  onLoad={handleImageLoad}
-                  onError={handleImageLoad} // Call handleImageLoad even if the image fails to load
-                />
               </div>
             </div>
           ))}
@@ -294,17 +303,11 @@ const BreakfastItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <h6>Selected Add-ons:</h6>
               <ul>
                 {selectedModifiers.map((modifier, index) => (
-                  <li key={index}>
-                    {modifier.selectedOption.name} - ฿{modifier.selectedOption.price}
-                    <Button variant="danger" size="sm" onClick={() => handleRemoveModifier(index)} style={{ marginLeft: '10px' }}>
-                      Remove
-                    </Button>
-                  </li>
+                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
                 ))}
               </ul>
             </div>
           )}
-
           <Form.Group controlId="quantitySelect">
             <Form.Label>Quantity</Form.Label>
             <div className="d-flex align-items-center">

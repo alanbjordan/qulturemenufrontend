@@ -3,22 +3,22 @@ import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 
 const QRCodeDisplay = () => {
-  const [qrCodeUrl, setQrCodeUrl] = useState(null);
-  const [userProfile, setUserProfile] = useState({ userId: '', displayName: '' });
+  const [qrCodeData, setQrCodeData] = useState(null);
+  const [userProfile, setUserProfile] = useState({ displayName: '' });
   const location = useLocation();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const userId = queryParams.get('user_id'); // Retrieve userId from the query parameter
+    const userId = queryParams.get('user_id');
 
     if (userId) {
-      axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${userId}`, {
-        responseType: 'blob' // Ensure the response type is set to 'blob'
-      })
+      axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${userId}`)
       .then(response => {
-        const url = URL.createObjectURL(response.data);
-        setQrCodeUrl(url); // Set the URL for rendering the image
-        setUserProfile({ userId }); // Mock display name, replace with actual logic if needed
+        const displayName = response.data.display_name;
+        const qrCodeBase64 = response.headers['x-qr-code']; // Get the QR code from the custom header
+
+        setUserProfile({ displayName });
+        setQrCodeData(`data:image/png;base64,${qrCodeBase64}`);
       })
       .catch(error => {
         console.error('Error fetching QR code:', error);
@@ -42,13 +42,13 @@ const QRCodeDisplay = () => {
       <h1 style={{
         fontSize: '2rem',
         marginBottom: '2rem',
-        color: '#D5AA55', // Gold color for the title
+        color: '#D5AA55',
       }}>
         My Qulture Rewards
       </h1>
-      {qrCodeUrl ? (
+      {qrCodeData ? (
         <>
-          <img src={qrCodeUrl} alt="QR Code" style={{
+          <img src={qrCodeData} alt="QR Code" style={{
             width: '200px',
             height: '200px',
             marginBottom: '1rem',
@@ -57,13 +57,13 @@ const QRCodeDisplay = () => {
             fontSize: '1.2rem',
             margin: '0.5rem 0',
           }}>
-            User ID: {userProfile.userId}
+            Hello, {userProfile.displayName}
           </p>
         </>
       ) : (
         <p style={{
           fontSize: '1.5rem',
-          color: '#D5AA55', // Gold color for loading text
+          color: '#D5AA55',
         }}>
           Loading QR code...
         </p>
