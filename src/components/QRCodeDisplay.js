@@ -26,24 +26,24 @@ const QRCodeDisplay = () => {
     loadCountries();
 
     const queryParams = new URLSearchParams(location.search);
-    const userId = queryParams.get('user_id');
+    const lineId = queryParams.get('line_id'); // Update this to use 'line_id' instead of 'user_id'
     const displayName = queryParams.get('display_name');
     const userStatus = queryParams.get('status');
 
-    console.log("Query params:", { userId, displayName, userStatus }); // Logging the extracted query parameters
+    console.log("Query params:", { lineId, displayName, userStatus }); // Logging the extracted query parameters
 
     if (displayName) {
       setUserProfile({ displayName });
     }
 
-    if (userId) {
+    if (lineId) {  // Check for lineId instead of userId
       if (userStatus === 'new') {
         // If the user is new, we show the form to collect additional details
         setIsUserFound(false);
         setLoading(false);
       } else {
         // If the user is existing, we fetch the QR code
-        fetchQRCode(userId);
+        fetchQRCode(lineId);
       }
     } else {
       setError('User ID not found in the URL.');
@@ -51,9 +51,9 @@ const QRCodeDisplay = () => {
     }
   }, [location.search]);
 
-  const fetchQRCode = (userId) => {
-    console.log("Fetching QR code for user ID:", userId); // Logging before making the API call
-    axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${userId}`, { responseType: 'blob' })
+  const fetchQRCode = (lineId) => {  // Update to use lineId
+    console.log("Fetching QR code for user ID:", lineId); // Logging before making the API call
+    axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${lineId}`, { responseType: 'blob' })
       .then(response => {
         if (response.status === 200) {
           const qrCodeUrl = URL.createObjectURL(response.data);
@@ -81,17 +81,19 @@ const QRCodeDisplay = () => {
       return;
     }
 
-    const userId = new URLSearchParams(location.search).get('user_id');
-    console.log("Submitting form with data:", { userId, displayName: userProfile.displayName, email, homeCountry, birthdate, gender }); // Logging form data
+    const lineId = new URLSearchParams(location.search).get('line_id');  // Update to use lineId
+    const account = new URLSearchParams(location.search).get('account');  // Get the account from the URL
+    console.log("Submitting form with data:", { lineId, displayName: userProfile.displayName, email, homeCountry, birthdate, gender, account }); // Logging form data
 
     try {
       const response = await axios.post(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/update_customer`, {
-        user_id: userId,
+        user_id: lineId,  // Update to use lineId
         display_name: userProfile.displayName,
         email,
         home_country: homeCountry,
         birthdate,
         gender,
+        account,  // Include the account in the payload
       });
 
       console.log('User data updated successfully:', response.data); // Logging success
@@ -99,13 +101,14 @@ const QRCodeDisplay = () => {
 
       // After form submission, behave as if the user is now an existing user
       setIsUserFound(true);
-      fetchQRCode(userId);
+      fetchQRCode(lineId);  // Update to use lineId
 
     } catch (error) {
       setFormError('Error updating user data.');
       console.error('Error updating user data:', error); // Logging error
     }
-  };
+};
+
 
   if (loading) {
     return <p style={{ textAlign: 'center', color: '#fff' }}>Loading...</p>;
