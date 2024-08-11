@@ -4,19 +4,23 @@ import { useLocation } from 'react-router-dom';
 
 const QRCodeDisplay = () => {
   const [qrCodeData, setQrCodeData] = useState(null);
-  const [userProfile, setUserProfile] = useState({ displayName: '' });
+  const [userProfile, setUserProfile] = useState({ displayName: 'User' });
   const location = useLocation();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const userId = queryParams.get('user_id');
+    const displayName = queryParams.get('display_name');
+
+    if (displayName) {
+      setUserProfile({ displayName });
+    }
 
     if (userId) {
       axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${userId}`, { responseType: 'blob' })
         .then(response => {
           const qrCodeUrl = URL.createObjectURL(response.data);
           setQrCodeData(qrCodeUrl);
-          setUserProfile({ displayName: response.data.display_name || 'User' });
         })
         .catch(error => {
           console.error('Error fetching QR code:', error);
@@ -55,7 +59,7 @@ const QRCodeDisplay = () => {
             fontSize: '1.2rem',
             margin: '0.5rem 0',
           }}>
-            Hello, {userProfile.displayName}
+            Account Name: {userProfile.displayName}
           </p>
         </>
       ) : (
