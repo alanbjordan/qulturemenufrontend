@@ -187,26 +187,31 @@ const AppContent = ({ tableNumber }) => {
     }
   };
 
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/line-login';
+
   return (
     <div className="App bg-black">
-      <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
-        <Container className="d-flex justify-content-between align-items-center">
-          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
-          <a href={`/?table=${tableNumber}`} onClick={() => window.location.reload()}>
-            <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
-          </a>
-          <div className="ms-auto d-flex align-items-center">
-            <Button variant="warning" onClick={() => callWaiter(tableNumber)} style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>
-              {loading ? <Spinner animation="border" size="sm" /> : buttonText}
-            </Button>
-            <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
-              <Badge badgeContent={getTotalQuantity()} color="secondary">
-                <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
-              </Badge>
-            </IconButton>
-          </div>
-        </Container>
-      </Navbar>
+      {!hideNavbar && (
+        <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
+          <Container className="d-flex justify-content-between align-items-center">
+            <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
+            <a href={`/?table=${tableNumber}`} onClick={() => window.location.reload()}>
+              <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
+            </a>
+            <div className="ms-auto d-flex align-items-center">
+              <Button variant="warning" onClick={() => callWaiter(tableNumber)} style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>
+                {loading ? <Spinner animation="border" size="sm" /> : buttonText}
+              </Button>
+              <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
+                <Badge badgeContent={getTotalQuantity()} color="secondary">
+                  <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
+                </Badge>
+              </IconButton>
+            </div>
+          </Container>
+        </Navbar>
+      )}
 
       <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start" style={{ backgroundColor: '#000000' }}>
         <Offcanvas.Header>

@@ -12,17 +12,15 @@ const QRCodeDisplay = () => {
     const userId = queryParams.get('user_id');
 
     if (userId) {
-      axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${userId}`)
-      .then(response => {
-        const displayName = response.data.display_name;
-        const qrCodeBase64 = response.headers['x-qr-code']; // Get the QR code from the custom header
-
-        setUserProfile({ displayName });
-        setQrCodeData(`data:image/png;base64,${qrCodeBase64}`);
-      })
-      .catch(error => {
-        console.error('Error fetching QR code:', error);
-      });
+      axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${userId}`, { responseType: 'blob' })
+        .then(response => {
+          const qrCodeUrl = URL.createObjectURL(response.data);
+          setQrCodeData(qrCodeUrl);
+          setUserProfile({ displayName: response.data.display_name || 'User' });
+        })
+        .catch(error => {
+          console.error('Error fetching QR code:', error);
+        });
     } else {
       console.error('User ID not found in the URL');
     }
