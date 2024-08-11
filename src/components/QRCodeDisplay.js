@@ -28,15 +28,23 @@ const QRCodeDisplay = () => {
     const queryParams = new URLSearchParams(location.search);
     const userId = queryParams.get('user_id');
     const displayName = queryParams.get('display_name');
+    const userStatus = queryParams.get('status');
 
-    console.log("Query params:", { userId, displayName }); // Logging the extracted query parameters
+    console.log("Query params:", { userId, displayName, userStatus }); // Logging the extracted query parameters
 
     if (displayName) {
       setUserProfile({ displayName });
     }
 
     if (userId) {
-      fetchQRCode(userId);
+      if (userStatus === 'new') {
+        // If the user is new, we show the form to collect additional details
+        setIsUserFound(false);
+        setLoading(false);
+      } else {
+        // If the user is existing, we fetch the QR code
+        fetchQRCode(userId);
+      }
     } else {
       setError('User ID not found in the URL.');
       setLoading(false);
@@ -50,20 +58,16 @@ const QRCodeDisplay = () => {
         if (response.status === 200) {
           const qrCodeUrl = URL.createObjectURL(response.data);
           setQrCodeData(qrCodeUrl);
-          setIsUserFound(true);  // User is found
+          setIsUserFound(true);
+          setLoading(false);
           console.log("QR code fetched successfully."); // Logging success
         }
       })
       .catch(error => {
-        if (error.response && error.response.status === 404) {
-          setIsUserFound(false);  // User is not found, show the form
-          console.log("User not found, showing the form."); // Logging user not found
-        } else {
-          setError('Error fetching QR code.');
-          console.error('Error fetching QR code:', error);
-        }
-      })
-      .finally(() => setLoading(false));
+        setError('Error fetching QR code.');
+        console.error('Error fetching QR code:', error);
+        setLoading(false);
+      });
   };
 
   const handleFormSubmit = async (e) => {
@@ -93,7 +97,8 @@ const QRCodeDisplay = () => {
       console.log('User data updated successfully:', response.data); // Logging success
       setFormError(null); // Clear any previous errors
 
-      // Fetch and display the QR code again after successful form submission
+      // After form submission, behave as if the user is now an existing user
+      setIsUserFound(true);
       fetchQRCode(userId);
 
     } catch (error) {
