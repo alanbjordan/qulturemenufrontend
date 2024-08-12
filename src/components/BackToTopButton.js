@@ -16,7 +16,8 @@ const BackToTopButton = ({ show }) => {
         style={{ 
           position: 'fixed', 
           bottom: '20px', 
-          right: '370px', // Adjust position if needed
+          left: '50%', 
+          transform: 'translateX(-50%)', // Centers the button horizontally
           backgroundColor: '#D5AA55', 
           color: '#000'
         }}
