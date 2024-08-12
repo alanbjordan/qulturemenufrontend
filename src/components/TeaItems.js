@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuItems } from '../services/api';
 import teaHeader from '../images/teaHeader.png';
-import placeholderImage from '../images/placeholder.gif';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { css } from '@emotion/react';
 import ClipLoader from 'react-spinners/ClipLoader';
@@ -30,6 +29,12 @@ const toTitleCase = (str) => {
   return str.replace(/\w\S*/g, (txt) => {
     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
   });
+};
+
+const generateImageUrl = (itemId) => {
+  const containerName = 'qulturecontainerstorage'; // Your Azure container name
+  const storageAccountName = 'storagequlturelounges'; // Your Azure storage account name
+  return `https://${storageAccountName}.blob.core.windows.net/${containerName}/${itemId}.jpg`;
 };
 
 const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
@@ -63,9 +68,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
 
     const loadData = async () => {
       await getMenuItems();
-      setTimeout(() => {
-        setLoading(false);
-      }, 10);
+      setLoading(false); // Set loading to false immediately after fetching
     };
 
     loadData();
@@ -208,49 +211,51 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         <div className="row">
           {teaItems.map(item => (
             <div key={item.id} className="col-md-12 mb-4">
-              <div className="card h-100 d-flex flex-row align-items-center">
-                <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
-                  alt={item.item_name}
-                  className="card-img-right lazyload"
-                  style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
-                  onLoad={handleImageLoad}
-                  onError={handleImageLoad}
-                />
-                <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
-                  <div>
-                    <h6 className="card-title" style={{ fontSize: '1rem' }}>{toTitleCase(item.item_name)}</h6>
-                    {item.variants && item.variants.length > 0 ? (
-                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.variants[0].default_price}</p>
-                    ) : (
-                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.default_price}</p>
-                    )}
-                    {item.description && (
-                      <Button variant="link" onClick={() => handleAddToCartClick(item)} style={{ fontSize: '0.8rem' }}>
-                        View Description
-                      </Button>
-                    )}
-                  </div>
-                  <button
-                    className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
-                    onClick={() => handleAddToCartClick(item)}
-                    style={{ fontSize: '0.9rem' }}
-                  >
-                    {loadingButtonId === item.id ? (
-                      <ClipLoader color={"#ffffff"} loading={true} size={15} />
-                    ) : shakingButtonId === item.id ? (
-                      "Adding"
-                    ) : (
-                      "Add to Cart"
-                    )}
-                  </button>
+            <div className="card h-100 d-flex flex-row align-items-center">
+              <img
+                src={generateImageUrl(item.id)}
+                alt={item.item_name}
+                className="card-img-right lazyload"
+                style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
+                onLoad={handleImageLoad}
+                onError={(e) => { 
+                  e.target.src = item.image_url || '';  // Fallback to Loyverse API image
+                  handleImageLoad();
+                }}
+              />
+              <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
+                <div>
+                  <h6 className="card-title" style={{ fontSize: '1rem' }}>{toTitleCase(item.item_name)}</h6>
+                  {item.variants && item.variants.length > 0 ? (
+                    <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.variants[0].default_price}</p>
+                  ) : (
+                    <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.default_price}</p>
+                  )}
+                  {item.description && (
+                    <Button variant="link" onClick={() => handleAddToCartClick(item)} style={{ fontSize: '0.8rem' }}>
+                      View Description
+                    </Button>
+                  )}
                 </div>
+                <button
+                  className={`custom-button mt-3 ${shakingButtonId === item.id ? 'shake' : ''}`}
+                  onClick={() => handleAddToCartClick(item)}
+                  style={{ fontSize: '0.9rem' }}
+                >
+                  {loadingButtonId === item.id ? (
+                    <ClipLoader color={"#ffffff"} loading={true} size={15} />
+                  ) : shakingButtonId === item.id ? (
+                    "Adding"
+                  ) : (
+                    "Add to Cart"
+                  )}
+                </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
+    </div>
 
       <Modal show={modalShow} onHide={handleModalClose}>
         <Modal.Header closeButton>
@@ -276,7 +281,7 @@ const TeaItems = ({ goToMainMenu, cartItems, setCartItems }) => {
           )}
           {modifiers.map((modifier, index) => (
             <Form.Group key={modifier.id} controlId={`modifierSelect-${modifier.id}`}>
-              <Form.Label>{modifier.name}</Form.Label>
+              <Form.Label>Select Add-ons</Form.Label>
               <div className="d-flex">
                 <Form.Control as="select" onChange={(e) => handleModifierChange(e, index)}>
                   <option value="">None</option>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuItems } from '../services/api';
 import coldPressHeader from '../images/coldPressHeader.png'; 
-import placeholderImage from '../images/placeholder.gif'; 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { css } from '@emotion/react';
 import ClipLoader from 'react-spinners/ClipLoader';
@@ -32,8 +31,14 @@ const toTitleCase = (str) => {
   });
 };
 
+const generateImageUrl = (itemId) => {
+  const containerName = 'qulturecontainerstorage'; // Your Azure container name
+  const storageAccountName = 'storagequlturelounges'; // Your Azure storage account name
+  return `https://${storageAccountName}.blob.core.windows.net/${containerName}/${itemId}.jpg`;
+};
+
 const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
-  const [coldPressItems, setColdPressItems] = useState([]);
+  const [allColdPressItems, setAllColdPressItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [imagesLoaded, setImagesLoaded] = useState(0);
   const [totalImages, setTotalImages] = useState(0);
@@ -50,22 +55,21 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
     const getMenuItems = async () => {
       const items = await fetchMenuItems();
       const coldPressItems = items.filter(item => item.category_id === 'bbc87f14-65e0-4ce8-93b5-b25747fc212c');
+      const additionalCategoryItems = items.filter(item => item.category_id === 'some-other-category-id'); // Replace with appropriate category ID
 
-      const sortedItems = coldPressItems.sort((a, b) => {
+      const allItems = [...coldPressItems, ...additionalCategoryItems].sort((a, b) => {
         const priceA = a.variants && a.variants.length > 0 ? a.variants[0].default_price : a.default_price;
         const priceB = b.variants && b.variants.length > 0 ? b.variants[0].default_price : b.default_price;
         return priceB - priceA;
       });
 
-      setColdPressItems(sortedItems);
-      setTotalImages(sortedItems.length);
+      setAllColdPressItems(allItems);
+      setTotalImages(allItems.length);
     };
 
     const loadData = async () => {
       await getMenuItems();
-      setTimeout(() => {
-        setLoading(false);
-      }, 3000);
+      setLoading(false); // Set loading to false immediately after fetching
     };
 
     loadData();
@@ -206,25 +210,27 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
       <button className='custom-button' onClick={goToMainMenu}>Back</button>
       <div className="container">
         <div className="row">
-          {coldPressItems.map(item => (
+          {allColdPressItems.map(item => (
             <div key={item.id} className="col-md-12 mb-4">
               <div className="card h-100 d-flex flex-row align-items-center">
                 <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
+                  src={generateImageUrl(item.id)}
                   alt={item.item_name}
                   className="card-img-right lazyload"
                   style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
                   onLoad={handleImageLoad}
-                  onError={handleImageLoad}
+                  onError={(e) => { 
+                    e.target.src = item.image_url || '';  // Fallback to Loyverse API image
+                    handleImageLoad();
+                  }}
                 />
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
                   <div>
                     <h6 className="card-title" style={{ fontSize: '1rem' }}>{toTitleCase(item.item_name)}</h6>
                     {item.variants && item.variants.length > 0 ? (
-                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.variants[0].default_price}</p>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>${item.variants[0].default_price}</p>
                     ) : (
-                      <p className="card-text" style={{ fontSize: '0.9rem' }}>฿{item.default_price}</p>
+                      <p className="card-text" style={{ fontSize: '0.9rem' }}>${item.default_price}</p>
                     )}
                     {item.description && (
                       <Button variant="link" onClick={() => handleAddToCartClick(item)} style={{ fontSize: '0.8rem' }}>
@@ -259,7 +265,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
         <Modal.Body style={{ color: 'black' }}>
           <h5>{modalContent.item_name}</h5>
           {selectedVariant && (
-            <h6>Price: ฿{selectedVariant.default_price}</h6>
+            <h6>Price: ${selectedVariant.default_price}</h6>
           )}
           <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(modalContent.description) }}></div>
           {modalContent.variants && modalContent.variants.length > 1 && (
@@ -268,7 +274,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <Form.Control as="select" value={selectedVariant ? selectedVariant.variant_id : ''} onChange={handleVariantChange}>
                 {modalContent.variants.map(variant => (
                   <option key={variant.variant_id} value={variant.variant_id}>
-                    {variant.option1_value} - ฿{variant.default_price}
+                    {variant.option1_value} - ${variant.default_price}
                   </option>
                 ))}
               </Form.Control>
@@ -282,7 +288,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
                   <option value="">None</option>
                   {modifier.modifier_options.map(option => (
                     <option key={option.id} value={option.id}>
-                      {option.name} - ฿{option.price}
+                      {option.name} - ${option.price}
                     </option>
                   ))}
                 </Form.Control>
@@ -297,7 +303,7 @@ const ColdPressItems = ({ goToMainMenu, cartItems, setCartItems }) => {
               <h6>Selected Add-ons:</h6>
               <ul>
                 {selectedModifiers.map((modifier, index) => (
-                  <li key={index}>{modifier.selectedOption.name} - ฿{modifier.selectedOption.price}</li>
+                  <li key={index}>{modifier.selectedOption.name} - ${modifier.selectedOption.price}</li>
                 ))}
               </ul>
             </div>
