@@ -55,6 +55,10 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   const [location, setLocation] = useState({ lat: null, lng: null });
   const [locationError, setLocationError] = useState(null); // eslint-disable-line no-unused-vars
 
+    // New state to toggle boundary enforcement
+    const [boundaryEnforced] = useState(false); // Only keep the boundaryEnforced state, remove setBoundaryEnforced
+
+
   const BOUNDARY = {
     latMin: 13.54, // Set your boundary's minimum latitude
     latMax: 13.86, // Set your boundary's maximum latitude
@@ -80,7 +84,7 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
   };
 
   const handleSubmitOrder = async () => {
-    if (!isWithinBoundary(location)) {
+    if (boundaryEnforced && !isWithinBoundary(location)) {
       setOrderStatus('Please visit the restaurant to submit an order. Or disable VPNs & Allow Location');
       setDialogOpen(true);
       return;
