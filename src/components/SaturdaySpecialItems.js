@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchMenuItems } from '../services/api';
 import saturdayHeader from '../images/saturdayHeader.png';
-import placeholderImage from '../images/placeholder.gif';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { css } from '@emotion/react';
 import ClipLoader from 'react-spinners/ClipLoader';
@@ -30,6 +29,12 @@ const toTitleCase = (str) => {
   return str.replace(/\w\S*/g, (txt) => {
     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
   });
+};
+
+const generateImageUrl = (itemId) => {
+  const containerName = 'qulturecontainerstorage'; // Your Azure container name
+  const storageAccountName = 'storagequlturelounges'; // Your Azure storage account name
+  return `https://${storageAccountName}.blob.core.windows.net/${containerName}/${itemId}.jpg`;
 };
 
 const SaturdaySpecial = ({ goToMainMenu, cartItems, setCartItems }) => {
@@ -63,9 +68,7 @@ const SaturdaySpecial = ({ goToMainMenu, cartItems, setCartItems }) => {
 
     const loadData = async () => {
       await getMenuItems();
-      setTimeout(() => {
-        setLoading(false);
-      }, 3000);
+      setLoading(false); // Set loading to false immediately after fetching
     };
 
     loadData();
@@ -210,13 +213,15 @@ const SaturdaySpecial = ({ goToMainMenu, cartItems, setCartItems }) => {
             <div key={item.id} className="col-md-12 mb-4">
               <div className="card h-100 d-flex flex-row align-items-center">
                 <img
-                  src={placeholderImage}
-                  data-src={item.image_url}
+                  src={generateImageUrl(item.id)}
                   alt={item.item_name}
                   className="card-img-right lazyload"
                   style={{ width: '200px', height: '200px', objectFit: 'cover', marginLeft: '10px', marginRight: '10px', borderRadius: '10px' }}
                   onLoad={handleImageLoad}
-                  onError={handleImageLoad}
+                  onError={(e) => { 
+                    e.target.src = item.image_url || '';  // Fallback to Loyverse API image
+                    handleImageLoad();
+                  }}
                 />
                 <div className="card-body flex-grow-1 d-flex flex-column justify-content-between" style={{ textAlign: 'left' }}>
                   <div>
