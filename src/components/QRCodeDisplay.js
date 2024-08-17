@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
-import { fetchCountries } from './fetchCountries'; // Import the fetchCountries function
+import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { fetchCountries } from './fetchCountries';
 
 const QRCodeDisplay = () => {
   const [qrCodeData, setQrCodeData] = useState(null);
@@ -11,11 +11,12 @@ const QRCodeDisplay = () => {
   const [homeCountry, setHomeCountry] = useState('');
   const [birthdate, setBirthdate] = useState('');
   const [gender, setGender] = useState('');
-  const [countries, setCountries] = useState([]); // State for storing fetched countries
-  const [loading, setLoading] = useState(true); // Loading state for QR code
-  const [error, setError] = useState(null); // Error state
-  const [formError, setFormError] = useState(null); // Form submission error state
+  const [countries, setCountries] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [formError, setFormError] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   useEffect(() => {
     const loadCountries = async () => {
@@ -107,8 +108,11 @@ const QRCodeDisplay = () => {
       setFormError('Error updating user data.');
       console.error('Error updating user data:', error); // Logging error
     }
-};
+  };
 
+  const handleClose = () => {
+    navigate('/'); // Navigate back to the home page
+  };
 
   if (loading) {
     return <p style={{ textAlign: 'center', color: '#fff' }}>Loading...</p>;
@@ -136,7 +140,20 @@ const QRCodeDisplay = () => {
         maxWidth: '400px',
         width: '100%',
         textAlign: 'left',
+        position: 'relative', // Added for positioning the close button
       }}>
+        <button onClick={handleClose} style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          backgroundColor: 'transparent',
+          border: 'none',
+          color: '#D5AA55',
+          fontSize: '1.5rem',
+          cursor: 'pointer',
+        }}>
+          &times;
+        </button>
         <h1 style={{
           fontSize: '2rem',
           marginBottom: '2rem',
