@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useLocation} from 'react-router-dom'; 
+import { useLocation } from 'react-router-dom';
 import { fetchCountries } from './fetchCountries';
 
 const QRCodeDisplay = () => {
@@ -16,6 +16,8 @@ const QRCodeDisplay = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [formError, setFormError] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
   const location = useLocation();
 
   useEffect(() => {
@@ -100,15 +102,17 @@ const QRCodeDisplay = () => {
         setLoading(false);
       });
   };
-  
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);  // Set submitting state to true
+    setFeedbackMessage('');  // Clear previous feedback messages
     console.log("Form submitted!");  // Logging form submission
 
     if (!email || !homeCountry || !birthdate || !gender) {
       setFormError('Please fill in all fields.');
-      console.log("Form validation failed. Missing fields."); // Logging validation failure
+      console.log("Form validation failed. Missing fields.");
+      setIsSubmitting(false);  // Reset submitting state
       return;
     }
 
@@ -118,7 +122,7 @@ const QRCodeDisplay = () => {
     try {
       const response = await axios.post(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/update_customer`, {
         user_id: lineId,
-        display_name: userProfile.displayName, // Ensure this key is correctly sent
+        display_name: userProfile.displayName,
         email,
         home_country: homeCountry,
         birthdate,
@@ -126,19 +130,20 @@ const QRCodeDisplay = () => {
         account,
       });
 
-      console.log('User data updated successfully:', response.data); // Logging success
+      console.log('User data updated successfully:', response.data);
       setFormError(null);
-
+      setFeedbackMessage('Form submitted successfully!');
       setIsUserFound(true);
       fetchQRCode(lineId);
 
     } catch (error) {
       setFormError('Error updating user data.');
       console.error('Error updating user data:', error);
+      setFeedbackMessage('Failed to submit the form.');
+    } finally {
+      setIsSubmitting(false);  // Reset submitting state
     }
   };
-
-
 
   if (loading) {
     return <p style={{ textAlign: 'center', color: '#fff' }}>Loading...</p>;
@@ -166,9 +171,8 @@ const QRCodeDisplay = () => {
         maxWidth: '400px',
         width: '100%',
         textAlign: 'left',
-        position: 'relative', // Added for positioning the close button
+        position: 'relative',
       }}>
-        
         <h1 style={{
           fontSize: '2rem',
           marginBottom: '2rem',
@@ -211,6 +215,14 @@ const QRCodeDisplay = () => {
               width: '100%',
             }}>
               {formError && <p style={{ color: 'red', marginBottom: '1rem' }}>{formError}</p>}
+              
+              {/* Feedback Message */}
+              {feedbackMessage && (
+                <p style={{ color: feedbackMessage.includes('success') ? 'green' : 'red', textAlign: 'center' }}>
+                  {feedbackMessage}
+                </p>
+              )}
+
               <label style={{ marginBottom: '1rem', fontSize: '1rem', color: '#D5AA55' }}>
                 Email:
                 <input
@@ -301,16 +313,17 @@ const QRCodeDisplay = () => {
                 marginTop: '1rem',
                 padding: '0.7rem',
                 borderRadius: '5px',
-                backgroundColor: '#D5AA55',
-                color: '#000',
+                backgroundColor: isSubmitting ? '#999' : '#D5AA55',
+                color: isSubmitting ? '#666' : '#000',
                 fontWeight: 'bold',
-                cursor: 'pointer',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 width: '100%',
                 boxSizing: 'border-box',
                 border: 'none',
                 boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-              }}>
-                Submit
+                opacity: isSubmitting ? 0.7 : 1,
+              }} disabled={isSubmitting}>
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
             </form>
           )
