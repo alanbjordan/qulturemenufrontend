@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useLocation} from 'react-router-dom'; 
 import { fetchCountries } from './fetchCountries';
 
 const QRCodeDisplay = () => {
@@ -17,7 +17,6 @@ const QRCodeDisplay = () => {
   const [error, setError] = useState(null);
   const [formError, setFormError] = useState(null);
   const location = useLocation();
-  const navigate = useNavigate(); // Initialize the useNavigate hook
 
   useEffect(() => {
     const loadCountries = async () => {
@@ -139,9 +138,7 @@ const QRCodeDisplay = () => {
     }
   };
 
-  const handleClose = () => {
-    navigate('/'); // Navigate back to the home page
-  };
+
 
   if (loading) {
     return <p style={{ textAlign: 'center', color: '#fff' }}>Loading...</p>;
@@ -171,18 +168,7 @@ const QRCodeDisplay = () => {
         textAlign: 'left',
         position: 'relative', // Added for positioning the close button
       }}>
-        <button onClick={handleClose} style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          backgroundColor: 'transparent',
-          border: 'none',
-          color: '#D5AA55',
-          fontSize: '1.5rem',
-          cursor: 'pointer',
-        }}>
-          &times;
-        </button>
+        
         <h1 style={{
           fontSize: '2rem',
           marginBottom: '2rem',
