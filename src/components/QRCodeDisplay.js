@@ -6,6 +6,7 @@ import { fetchCountries } from './fetchCountries';
 const QRCodeDisplay = () => {
   const [qrCodeData, setQrCodeData] = useState(null);
   const [userProfile, setUserProfile] = useState({ displayName: 'User' });
+  const [userRewards, setUserRewards] = useState(0); // Store only rewards points here
   const [isUserFound, setIsUserFound] = useState(false);
   const [email, setEmail] = useState('');
   const [homeCountry, setHomeCountry] = useState('');
@@ -20,14 +21,19 @@ const QRCodeDisplay = () => {
 
   useEffect(() => {
     const loadCountries = async () => {
-      const countryList = await fetchCountries();
-      setCountries(countryList);
+      try {
+        const countryList = await fetchCountries();
+        setCountries(countryList);
+      } catch (err) {
+        setError('Error loading countries.');
+        setLoading(false);
+      }
     };
 
     loadCountries();
 
     const queryParams = new URLSearchParams(location.search);
-    const lineId = queryParams.get('line_id'); // Update this to use 'line_id' instead of 'user_id'
+    const lineId = queryParams.get('line_id'); // Use 'line_id' instead of 'user_id'
     const displayName = queryParams.get('display_name');
     const userStatus = queryParams.get('status');
 
@@ -39,12 +45,13 @@ const QRCodeDisplay = () => {
 
     if (lineId) {  // Check for lineId instead of userId
       if (userStatus === 'new') {
-        // If the user is new, we show the form to collect additional details
+        // If the user is new, show the form to collect additional details
         setIsUserFound(false);
         setLoading(false);
       } else {
-        // If the user is existing, we fetch the QR code
+        // If the user is existing, fetch the QR code and rewards points
         fetchQRCode(lineId);
+        fetchRewards(lineId);
       }
     } else {
       setError('User ID not found in the URL.');
@@ -52,7 +59,7 @@ const QRCodeDisplay = () => {
     }
   }, [location.search]);
 
-  const fetchQRCode = (lineId) => {  // Update to use lineId
+  const fetchQRCode = (lineId) => {
     console.log("Fetching QR code for user ID:", lineId); // Logging before making the API call
     axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${lineId}`, { responseType: 'blob' })
       .then(response => {
@@ -60,8 +67,11 @@ const QRCodeDisplay = () => {
           const qrCodeUrl = URL.createObjectURL(response.data);
           setQrCodeData(qrCodeUrl);
           setIsUserFound(true);
-          setLoading(false);
+          setLoading(false); // Ensure loading is set to false after successful fetch
           console.log("QR code fetched successfully."); // Logging success
+        } else {
+          setError('Failed to fetch QR code.');
+          setLoading(false);
         }
       })
       .catch(error => {
@@ -71,42 +81,63 @@ const QRCodeDisplay = () => {
       });
   };
 
+  const fetchRewards = (lineId) => {
+    console.log("Fetching rewards points for user ID:", lineId);
+    axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_user_profile/${lineId}`)
+      .then(response => {
+        if (response.status === 200) {
+          const rewardsPoints = response.data.rewards_points;
+          setUserRewards(rewardsPoints); // Set only rewards points
+          setLoading(false); // Ensure loading is set to false after successful fetch
+          console.log("Rewards points fetched successfully.");
+        } else {
+          setError('Failed to fetch rewards points.');
+          setLoading(false);
+        }
+      })
+      .catch(error => {
+        setError('Error fetching rewards points.');
+        console.error('Error fetching rewards points:', error);
+        setLoading(false);
+      });
+  };
+  
+
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submitted!");  // Logging form submission
 
     if (!email || !homeCountry || !birthdate || !gender) {
-        setFormError('Please fill in all fields.');
-        console.log("Form validation failed. Missing fields."); // Logging validation failure
-        return;
+      setFormError('Please fill in all fields.');
+      console.log("Form validation failed. Missing fields."); // Logging validation failure
+      return;
     }
 
     const lineId = new URLSearchParams(location.search).get('line_id');
     const account = new URLSearchParams(location.search).get('account');
 
     try {
-        const response = await axios.post(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/update_customer`, {
-            user_id: lineId,
-            display_name: userProfile.display_name, // Ensure this key is correctly sent
-            email,
-            home_country: homeCountry,
-            birthdate,
-            gender,
-            account,
-        });
+      const response = await axios.post(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/update_customer`, {
+        user_id: lineId,
+        display_name: userProfile.displayName, // Ensure this key is correctly sent
+        email,
+        home_country: homeCountry,
+        birthdate,
+        gender,
+        account,
+      });
 
-        console.log('User data updated successfully:', response.data); // Logging success
-        setFormError(null);
+      console.log('User data updated successfully:', response.data); // Logging success
+      setFormError(null);
 
-        setIsUserFound(true);
-        fetchQRCode(lineId);
+      setIsUserFound(true);
+      fetchQRCode(lineId);
 
     } catch (error) {
-        setFormError('Error updating user data.');
-        console.error('Error updating user data:', error);
+      setFormError('Error updating user data.');
+      console.error('Error updating user data:', error);
     }
-};
-
+  };
 
   const handleClose = () => {
     navigate('/'); // Navigate back to the home page
@@ -176,6 +207,13 @@ const QRCodeDisplay = () => {
               textAlign: 'center',
             }}>
               Account Name: {userProfile.displayName}
+            </p>
+            <p style={{
+              fontSize: '1.2rem',
+              margin: '0.5rem 0',
+              textAlign: 'center',
+            }}>
+              Rewards Points: {userRewards.toLocaleString()}
             </p>
           </>
         ) : (
