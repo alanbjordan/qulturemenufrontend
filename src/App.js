@@ -159,6 +159,9 @@ const AppContent = ({ tableNumber }) => {
                 <div className="section mb-4" onClick={() => setView('brunch')}>
                   <img src={brunchPhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
+                <div className="section mb-4" onClick={() => setView('saturdaySpecial')}>
+                  <img src={saturdaySpecial} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
+                </div>
                 <div className="section mb-4" onClick={() => setView('coffee')}>
                   <img src={coffeePhoto} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
@@ -177,9 +180,6 @@ const AppContent = ({ tableNumber }) => {
                 <div className="section mb-4" onClick={() => setView('bakery')}>
                   <img src={bakery} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
                 </div>
-                <div className="section mb-4" onClick={() => setView('saturdaySpecial')}>
-                  <img src={saturdaySpecial} alt='Qulture' className='img-fluid rounded border img-hover-effect' />
-                </div>
               </div>
             </div>
           </div>
@@ -193,25 +193,25 @@ const AppContent = ({ tableNumber }) => {
   return (
     <div className="App bg-black">
       {!hideNavbar && (
-        <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
-          <Container className="d-flex justify-content-between align-items-center">
-            <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
-            <a href={`/?table=${tableNumber}`} onClick={() => window.location.reload()}>
-              <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
-            </a>
-            <div className="ms-auto d-flex align-items-center">
-              <Button variant="warning" onClick={() => callWaiter(tableNumber)} style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>
-                {loading ? <Spinner animation="border" size="sm" /> : buttonText}
-              </Button>
-              <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55' }}>
-                <Badge badgeContent={getTotalQuantity()} color="secondary">
-                  <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
-                </Badge>
-              </IconButton>
-            </div>
-          </Container>
-        </Navbar>
-      )}
+      <Navbar bg="black" variant="dark" expand="lg" className="d-flex navbar-fixed-top justify-content-between align-items-center" style={{ backgroundColor: '#000000' }}>
+        <Container className="d-flex justify-content-between align-items-center">
+          <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={handleShow} style={{ display: 'block' }} />
+          <a href={`/?table=${tableNumber}`} onClick={() => window.location.reload()}>
+            <FontAwesomeIcon icon={faHome} style={{ color: '#D5AA55', fontSize: '24px', marginLeft: '15px' }} />
+          </a>
+          <IconButton color="primary" onClick={() => setShowCart(true)} style={{ color: '#D5AA55', marginLeft: '15px' }}>
+            <Badge badgeContent={getTotalQuantity()} color="secondary">
+              <FontAwesomeIcon icon={faShoppingCart} style={{ fontSize: '24px' }} />
+            </Badge>
+          </IconButton>
+          <div className="ms-auto d-flex align-items-center">
+            <Button variant="warning" onClick={() => callWaiter(tableNumber)} style={{ backgroundColor: '#D5AA55', color: '#000000', fontWeight: 'bold', marginRight: '15px' }}>
+              {loading ? <Spinner animation="border" size="sm" /> : buttonText}
+            </Button>
+          </div>
+        </Container>
+      </Navbar>
+    )}
 
       <Offcanvas show={showOffcanvas} onHide={handleClose} placement="start" style={{ backgroundColor: '#000000' }}>
         <Offcanvas.Header>
