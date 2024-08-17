@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useLocation, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useLocation, useNavigate } from 'react-router-dom';
 import { fetchCountries } from './fetchCountries';
 
 const QRCodeDisplay = () => {
   const [qrCodeData, setQrCodeData] = useState(null);
-  const [userProfile, setUserProfile] = useState({ displayName: 'User' });
+  const [userProfile, setUserProfile] = useState({ displayName: 'User', rewards_points: 0 });
   const [isUserFound, setIsUserFound] = useState(false);
   const [email, setEmail] = useState('');
   const [homeCountry, setHomeCountry] = useState('');
@@ -16,7 +16,7 @@ const QRCodeDisplay = () => {
   const [error, setError] = useState(null);
   const [formError, setFormError] = useState(null);
   const location = useLocation();
-  const navigate = useNavigate(); // Initialize the useNavigate hook
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadCountries = async () => {
@@ -27,23 +27,18 @@ const QRCodeDisplay = () => {
     loadCountries();
 
     const queryParams = new URLSearchParams(location.search);
-    const lineId = queryParams.get('line_id'); // Update this to use 'line_id' instead of 'user_id'
+    const lineId = queryParams.get('line_id');
     const displayName = queryParams.get('display_name');
     const userStatus = queryParams.get('status');
 
-    console.log("Query params:", { lineId, displayName, userStatus }); // Logging the extracted query parameters
+    console.log("Query params:", { lineId, displayName, userStatus });
 
-    if (displayName) {
-      setUserProfile({ displayName });
-    }
-
-    if (lineId) {  // Check for lineId instead of userId
+    if (lineId) {
       if (userStatus === 'new') {
-        // If the user is new, we show the form to collect additional details
         setIsUserFound(false);
         setLoading(false);
       } else {
-        // If the user is existing, we fetch the QR code
+        fetchUserProfile(lineId);  // Fetch the user profile including rewards points
         fetchQRCode(lineId);
       }
     } else {
@@ -52,8 +47,25 @@ const QRCodeDisplay = () => {
     }
   }, [location.search]);
 
-  const fetchQRCode = (lineId) => {  // Update to use lineId
-    console.log("Fetching QR code for user ID:", lineId); // Logging before making the API call
+  const fetchUserProfile = (lineId) => {
+    axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_user_profile/${lineId}`)
+      .then(response => {
+        if (response.status === 200) {
+          console.log("User profile fetched successfully:", response.data);
+          setUserProfile(response.data);
+          console.log("User Profile set:", response.data);
+        } else {
+          console.error("Failed to fetch user profile. Status code:", response.status);
+        }
+      })
+      .catch(error => {
+        setError('Error fetching user profile.');
+        console.error('Error fetching user profile:', error);
+      });
+  };
+
+  const fetchQRCode = (lineId) => {
+    console.log("Fetching QR code for user ID:", lineId);
     axios.get(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/get_qr_code/${lineId}`, { responseType: 'blob' })
       .then(response => {
         if (response.status === 200) {
@@ -61,7 +73,7 @@ const QRCodeDisplay = () => {
           setQrCodeData(qrCodeUrl);
           setIsUserFound(true);
           setLoading(false);
-          console.log("QR code fetched successfully."); // Logging success
+          console.log("QR code fetched successfully.");
         }
       })
       .catch(error => {
@@ -73,45 +85,42 @@ const QRCodeDisplay = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted!");  // Logging form submission
+    console.log("Form submitted!");
 
-    // Basic form validation
     if (!email || !homeCountry || !birthdate || !gender) {
       setFormError('Please fill in all fields.');
-      console.log("Form validation failed. Missing fields."); // Logging validation failure
+      console.log("Form validation failed. Missing fields.");
       return;
     }
 
-    const lineId = new URLSearchParams(location.search).get('line_id');  // Update to use lineId
-    const account = new URLSearchParams(location.search).get('account');  // Get the account from the URL
-    console.log("Submitting form with data:", { lineId, displayName: userProfile.displayName, email, homeCountry, birthdate, gender, account }); // Logging form data
+    const lineId = new URLSearchParams(location.search).get('line_id');
+    const account = new URLSearchParams(location.search).get('account');
+    console.log("Submitting form with data:", { lineId, displayName: userProfile.displayName, email, homeCountry, birthdate, gender, account });
 
     try {
       const response = await axios.post(`https://qulturemenuflaskbackend-5969f5ac152a.herokuapp.com/api/update_customer`, {
-        user_id: lineId,  // Update to use lineId
+        user_id: lineId,
         display_name: userProfile.displayName,
         email,
         home_country: homeCountry,
         birthdate,
         gender,
-        account,  // Include the account in the payload
+        account,
       });
 
-      console.log('User data updated successfully:', response.data); // Logging success
-      setFormError(null); // Clear any previous errors
-
-      // After form submission, behave as if the user is now an existing user
+      console.log('User data updated successfully:', response.data);
+      setFormError(null);
       setIsUserFound(true);
-      fetchQRCode(lineId);  // Update to use lineId
+      fetchQRCode(lineId);
 
     } catch (error) {
       setFormError('Error updating user data.');
-      console.error('Error updating user data:', error); // Logging error
+      console.error('Error updating user data:', error);
     }
   };
 
   const handleClose = () => {
-    navigate('/'); // Navigate back to the home page
+    navigate('/');
   };
 
   if (loading) {
@@ -140,7 +149,7 @@ const QRCodeDisplay = () => {
         maxWidth: '400px',
         width: '100%',
         textAlign: 'left',
-        position: 'relative', // Added for positioning the close button
+        position: 'relative',
       }}>
         <button onClick={handleClose} style={{
           position: 'absolute',
@@ -177,7 +186,14 @@ const QRCodeDisplay = () => {
               margin: '0.5rem 0',
               textAlign: 'center',
             }}>
-              Account Name: {userProfile.displayName}
+              Account Name: {userProfile.displayName || userProfile.display_name || 'N/A'}
+            </p>
+            <p style={{
+              fontSize: '1.2rem',
+              margin: '0.5rem 0',
+              textAlign: 'center',
+            }}>
+              Points Balance: {userProfile.rewards_points}
             </p>
           </>
         ) : (
