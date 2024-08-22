@@ -119,11 +119,5 @@ The `SessionContext` is created to manage session state globally. The `SessionPr
 ### Timeout Mechanism
 A timeout mechanism is implemented to clear the session after a period of inactivity. The timeout is reset on user interactions such as clicks and key presses.
 
-## Contributing
-Contributions are welcome! Please create a pull request with a detailed description of your changes.
-
-## License
-This project is licensed under the MIT License.
 ```
 
-This markdown file should give a comprehensive overview of your Digital Menu application, formatted appropriately for GitHub. Adjust the content as needed to match your specific project details and repository URL.
