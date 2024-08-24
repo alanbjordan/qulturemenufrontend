@@ -46,25 +46,14 @@ const CloseButtonContainer = styled('div')({
   justifyContent: 'flex-end',
 });
 
-const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
+const Cart = ({ cartItems = [], setCartItems, clearCart, open, onClose }) => {
   const [orderStatus, setOrderStatus] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [cartComment, setCartComment] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [location, setLocation] = useState({ lat: null, lng: null });
-  const [locationError, setLocationError] = useState(null); // eslint-disable-line no-unused-vars
-
-    // New state to toggle boundary enforcement
-    const [boundaryEnforced] = useState(false); // Only keep the boundaryEnforced state, remove setBoundaryEnforced
-
-
-  const BOUNDARY = {
-    latMin: 13.54, // Set your boundary's minimum latitude
-    latMax: 13.86, // Set your boundary's maximum latitude
-    lngMin: 100.50, // Set your boundary's minimum longitude
-    lngMax: 100.70  // Set your boundary's maximum longitude
-  };
+  const [locationError, setLocationError] = useState(null); // We'll handle this to remove ESLint warning
 
   useEffect(() => {
     const params = getQueryParams(window.location.search);
@@ -74,21 +63,47 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
     }
   }, []);
 
-  const isWithinBoundary = (location) => {
-    return (
-      location.lat >= BOUNDARY.latMin &&
-      location.lat <= BOUNDARY.latMax &&
-      location.lng >= BOUNDARY.lngMin &&
-      location.lng <= BOUNDARY.lngMax
-    );
+  // Ensure cartItems is always an array
+  useEffect(() => {
+    if (!Array.isArray(cartItems)) {
+      console.error('cartItems prop is not an array:', cartItems);
+      setCartItems([]);
+    }
+  }, [cartItems, setCartItems]);
+
+  const handleRemoveItem = (itemId) => {
+    if (!Array.isArray(cartItems)) {
+      console.error('Attempted to remove item from non-array cartItems:', cartItems);
+      return;
+    }
+    setCartItems(cartItems.filter(item => item.id !== itemId));
+  };
+
+  const getTotalPrice = () => {
+    if (!Array.isArray(cartItems)) {
+      console.error('cartItems is not an array when calculating total price:', cartItems);
+      return "0.00";
+    }
+
+    const total = cartItems.reduce((total, item) => {
+      const itemPrice = item.price || 0;
+      const modifiersPrice = Array.isArray(item.selectedModifiers) ? item.selectedModifiers.reduce((modTotal, mod) => {
+        return modTotal + (mod.selectedOption ? mod.selectedOption.price : 0);
+      }, 0) : 0;
+      return total + (itemPrice + modifiersPrice) * (item.quantity || 1);
+    }, 0).toFixed(2);
+
+    return total;
   };
 
   const handleSubmitOrder = async () => {
-    if (boundaryEnforced && !isWithinBoundary(location)) {
-      setOrderStatus('Please visit the restaurant to submit an order. Or disable VPNs & Allow Location');
-      setDialogOpen(true);
-      return;
-    }
+    // If you have logic to enforce boundary, include it here
+    // For example:
+    // if (boundaryEnforced && !isWithinBoundary(location)) {
+    //   setOrderStatus('Please visit the restaurant to submit an order. Or disable VPNs & Allow Location');
+    //   setDialogOpen(true);
+    //   return;
+    // }
 
     setLoading(true);
 
@@ -96,12 +111,12 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
       table_name: tableNumber,
       comment: cartComment || 'No comment',
       location: location, // Include location data
-      line_items: cartItems.map(item => ({
+      line_items: Array.isArray(cartItems) ? cartItems.map(item => ({
         item_name: item.item_name,
         quantity: item.quantity,
         selectedVariant: item.selectedVariant || null,
         selectedModifiers: item.selectedModifiers || []
-      }))
+      })) : []
     };
 
     try {
@@ -130,20 +145,16 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
     }
   };
 
-  const handleRemoveItem = (itemId) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
-  };
-
-  const getTotalPrice = () => {
-    const total = cartItems.reduce((total, item) => {
-      const itemPrice = item.price;
-      const modifiersPrice = item.selectedModifiers.reduce((modTotal, mod) => {
-        return modTotal + (mod.selectedOption ? mod.selectedOption.price : 0);
-      }, 0);
-      return total + (itemPrice + modifiersPrice) * item.quantity;
-    }, 0).toFixed(2);
-    return total;
-  };
+  // Handle location errors to remove ESLint warning
+  useEffect(() => {
+    if (locationError) {
+      console.error('Location Error:', locationError);
+      setOrderStatus(`Location Error: ${locationError}`);
+      setDialogOpen(true);
+      // Optionally, you can clear the error after handling
+      setLocationError(null);
+    }
+  }, [locationError]);
 
   return (
     <>
@@ -167,12 +178,12 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
               </IconButton>
             </CloseButtonContainer>
             <ModalContent>
-              {cartItems.length > 0 ? (
+              {Array.isArray(cartItems) && cartItems.length > 0 ? (
                 <>
                   <List>
                     {cartItems.map(item => (
                       <React.Fragment key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
-                        <ListItem key={`${item.id}-${item.selectedChoice ? item.selectedChoice.choice_id : 'no-choice'}`}>
+                        <ListItem>
                           <Grid container spacing={1} alignItems="center">
                             <Grid item xs={10}>
                               <ListItemText
@@ -227,7 +238,7 @@ const Cart = ({ cartItems, setCartItems, clearCart, open, onClose }) => {
               {orderStatus && <Typography variant="body2" style={{ marginTop: '12px' }}>{orderStatus}</Typography>}
             </ModalContent>
 
-            {cartItems.length > 0 && (
+            {Array.isArray(cartItems) && cartItems.length > 0 && (
               <ButtonContainer>
                 <Button
                   variant="contained"
