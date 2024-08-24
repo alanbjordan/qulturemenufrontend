@@ -32,6 +32,7 @@ import CreatePass from './components/CreatePass';
 import Cart from './components/Cart';
 import StaffDashboard from './components/StaffDashboard';
 import QRCodeDisplay from './components/QRCodeDisplay';
+import LandingPage from './components/LandingPage';  // Adjust the path as necessary
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { useSession } from './contexts/SessionContext';
@@ -224,9 +225,13 @@ const AppContent = ({ tableNumber }) => {
             <Button as={Link} to="/login" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Staff Login</Button>
           )}
           <Button as={Link} to={'https://lin.ee/hbKtoo0'} variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>Add Our Line Official</Button>
+          <Button as={Link} to="/rewards" variant="dark" className="mb-2 w-100 text-start" onClick={handleClose} style={{ backgroundColor: '#D5AA55', color: '#FFFFFF', fontWeight: 'bold' }}>
+            My Qulture Rewards
+          </Button>
+
         </Offcanvas.Body>
       </Offcanvas>
-
+      
       <Routes>
         <Route path="/" element={renderContent()} />
         <Route path="/login" element={<Login />} />
@@ -234,8 +239,11 @@ const AppContent = ({ tableNumber }) => {
         <Route path="/staff-dashboard" element={<StaffDashboard />} />
         <Route path="/staff-orders" element={<StaffOrders />} />
         <Route path="/create-pass" element={<CreatePass />} />
+        <Route path="/rewards" element={<LandingPage />} />  {/* Add this line */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+
+      
 
       <BackToTopButton show={showButton} />
       <Cart cartItems={cartItems} setCartItems={items => setSessionData(prev => ({ ...prev, cartItems: items }))} clearCart={clearCart} open={showCart} onClose={() => setShowCart(false)} />
