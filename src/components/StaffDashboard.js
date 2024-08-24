@@ -11,9 +11,6 @@ const StaffDashboard = () => {
       <Button className="mt-3" onClick={() => navigate('/staff-orders')}>
         View Orders
       </Button>
-      <Button className="mt-3" onClick={() => navigate('/print-qr-codes')}>
-        Print QR Codes
-      </Button>
     </Container>
   );
 };
