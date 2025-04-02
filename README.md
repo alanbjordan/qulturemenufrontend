@@ -1,3 +1,5 @@
+## GENERATIVE AI WAS USED IN THE CREATION OF THIS APPLICATION. ****
+
 # Digital Menu Application
 
 ## Table of Contents
